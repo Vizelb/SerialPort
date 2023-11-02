@@ -18,6 +18,8 @@
 struct termios serial_settings;
 int serial_port;
 
+unsigned char bufrd[255];
+
 // 2 variant
 #include <windows.h>
 
@@ -79,7 +81,7 @@ void TransmissionCycle()
 
         printf("Prepare To Read\n");
         //sleep(1);
-        sleep(1);
+        //sleep(1);
     //SetCommMask(HANDLE hComm, DWORD dwEvtMask);
 
         SetCommMask(hComm, EV_RXCHAR);
@@ -174,14 +176,15 @@ BOOL read_com_port()
                     btr = comstat.cbInQue;
                     if(btr)
                     {
-                        /*ReadFile(hComm, bufrd, btr, &temp, &overlapped);
+                        ReadFile(hComm, bufrd, btr, &temp, &overlapped);
                         for (i = 0; i < temp; i++)
                         {
                             printf("%X", bufrd[i]);
                             printf(";");
                         }
-                        printf("\n");*/
-                        while (i < 12)
+                        printf("\n");
+
+                        /*while (i < 12)
                         {
                             if (ReadFile(hComm,
                             &chRet,
@@ -195,7 +198,7 @@ BOOL read_com_port()
                                 i++;
                             }
 
-                        }
+                        }*/
     fprintf(stdout, "\n");
 
                     }
