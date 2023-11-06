@@ -29,4 +29,6 @@ BOOL send_array(uint8_t *dataArray, uint16_t arraySize);
 BOOL read_com_port();
 void close_com_port();
 
+void repeatWork();
+
 #endif // PORT_MENU_H

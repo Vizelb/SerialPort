@@ -66,8 +66,12 @@ void InitPortMenu()
     printf("Work Cycle\n");
     //while (1)
     //{
-    WorkCycle();
-    BREAK_LINE();
+        //if (!(InputCommand() == '#')
+          //  WorkCycle();
+        //break;
+    repeatWork();
+
+        //BREAK_LINE();
     //}
 
     // #4
@@ -78,32 +82,27 @@ void InitPortMenu()
 
 }
 
+void repeatWork()
+{
+    if (InputCommand() != '#')
+        WorkCycle();
+    return;
+}
+
 
 void WorkCycle()
 {
     int i;
     uint8_t data[12];
-    char command;
+    //char command;
 
     for (i = 0; i < 12; i++)
     {
         data[i] = i;
     }
-    printf("Input command\n");
-    //if (!(InputCommand() == 0x01))
-        //return;
 
-    //sleep(1);
-
-    printf("Prepare To Send\n");
-    while (1)
-    {
-        command = getchar();
-        printf("Command - %c\n", command);
-        if (command == '#')
-            return;
-        for (i = 0; i < 10; i++)
-        {
+    //while (1)
+    //{
         printf("Prepare To Send Data\n");
         if(!send_char(0xFA))
         //if(!send_array(data, 12))
@@ -111,17 +110,21 @@ void WorkCycle()
             printf("Error send_char 3\n");
             return;
         }
-        }
+        printf("Command Send\n");
+        //BREAK_LINE();
+
         printf("Prepare To Read\n");
-    //SetCommMask(HANDLE hComm, DWORD dwEvtMask);
-        //SetCommMask(hComm, EV_RXCHAR);
         if(!read_com_port())
         {
             printf("Error read_com_port 4\n");
             return;
         }
+        //BREAK_LINE();
+        //sleep(2);
 
-    }
+    repeatWork();
+    return;
+    ///////}
 
     if(!send_char(0xFA))
         //if(!send_array(data, 12))
@@ -132,13 +135,14 @@ void WorkCycle()
 
     printf("Prepare To Read\n");
     //SetCommMask(HANDLE hComm, DWORD dwEvtMask);
-    SetCommMask(hComm, EV_RXCHAR);
+    //SetCommMask(hComm, EV_RXCHAR);
 
     if(!read_com_port())
     {
         printf("Error read_com_port 4\n");
         return;
     }
+
     sleep(1);
 
 }
@@ -147,8 +151,8 @@ void WorkCycle()
 // 2 variant - работает
 BOOL init_com_port()
 {
-    //hComm = CreateFile("COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
-    hComm = CreateFile(SERIAL_PORT/*"COM4"*/, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+    hComm = CreateFile("COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+    //hComm = CreateFile(/*SERIAL_PORT*/"COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
     if (hComm == INVALID_HANDLE_VALUE)
     {
         printf("Error Error opening serial port\n");
@@ -165,7 +169,7 @@ BOOL config_com_port()
     if (GetCommState(hComm, &dcbSerialParams) == FALSE)
         return FALSE;
 
-    dcbSerialParams.BaudRate = BOAD_RATE;//CBR_19200;
+    dcbSerialParams.BaudRate = CBR_19200;
     dcbSerialParams.ByteSize = 8;
     dcbSerialParams.Parity = NOPARITY;
     dcbSerialParams.StopBits = ONESTOPBIT;
@@ -183,7 +187,7 @@ BOOL config_com_port()
 BOOL send_char(uint8_t c)
 {
     int i;
-    DWORD dwBytesWritten;
+    DWORD dwBytesWritten = 0;
     DWORD feedBack;
     //char msg[] = {c, '\0'};
     //uint8_t data[] = {c, '\0'};
@@ -197,11 +201,10 @@ BOOL send_char(uint8_t c)
 
     if (WriteFile(hComm,            // дескриптор устр
                   data,              // указатель на буфер
-                  //sizeof(msg),      // длина буфера
                   (DWORD)sizeof(data),      // длина буфера
                   &dwBytesWritten,  // кол-во записанных байтов
                   NULL)             // overlapped атрибут
-        || feedBack != (DWORD)sizeof(data)
+        //|| feedBack != (DWORD)sizeof(data)
         )
         {
         return TRUE;
@@ -237,8 +240,10 @@ BOOL read_com_port()
     COMSTAT comstat;
 
     DWORD dwBytesRead = 0;          // кол-во прочитанных байтов
-    DWORD btr, temp, mask, signal;
+    DWORD btr = 12;
+    DWORD temp, mask, signal;
     //overlapped.hEvent = CreateEvent (NULL, true, true, NULL);
+
     sync.hEvent = CreateEvent (NULL, TRUE, FALSE, NULL);
     if (SetCommMask(hComm, EV_RXCHAR))
     {
@@ -246,20 +251,25 @@ BOOL read_com_port()
         wait_s = WaitForSingleObject(sync.hEvent, READ_TIME);
         if (wait_s == WAIT_OBJECT_0)
         {
-            ReadFile(hComm, bufrd, btr, &read_s, &sync);
+            ReadFile(hComm, bufrd, btr, &temp, &sync);
             wait_s = WaitForSingleObject(sync.hEvent, READ_TIME);
             if (wait_s == WAIT_OBJECT_0)
-                if (GetOverlappedResult(hComm, &sync, &read_s, FALSE))
-                    result = read_s;
+                if (GetOverlappedResult(hComm, &sync, &temp, FALSE))
+                    result = temp;
+            for (i = 0; i < temp; i++)
+            {
+                printf("%X", bufrd[i]);
+                //printf(";");
+            }
+            //printf("\n%dx\n", &bufrd);
+            fprintf(stdout, "\n");
         }
     }
     CloseHandle(sync.hEvent);
+    return;
 
 
-    //char chRet = '\0';
-    //WaitCommEvent(hComm, &mask, &overlapped);
-
-    /*signal = WaitForSingleObject(overlapped.hEvent, INFINITE);
+    signal = WaitForSingleObject(overlapped.hEvent, INFINITE);
 
     if (signal == WAIT_OBJECT_0)
     {
@@ -278,47 +288,15 @@ BOOL read_com_port()
                             printf(";");
                         }
                         printf("\n");
-*/
-                        /*while (i < 12)
-                        {
-                            if (ReadFile(hComm,
-                            &chRet,
-                            sizeof(chRet),
-                            &dwBytesRead,
-                            NULL))
-                            {
-                                if (i == 0 && (chRet == 0))
-                                    return FALSE;
-                                fprintf(stdout, "%X", chRet);
-                                i++;
-                            }
+                        fprintf(stdout, "\n");
 
-                        }*/
-    //fprintf(stdout, "\n");
-
-                    //}
-                //}
-            //}
-        //}
-
+                    }
+                }
+            }
+        }
     return TRUE;
 
-    /*while (i < 12)
-    {
-        if (ReadFile(hComm,
-                     &chRet,
-                     sizeof(chRet),
-                     &dwBytesRead,
-                     NULL))
-        {
-            if (i == 0 && (chRet == 0))
-                return;
-            fprintf(stdout, "%X", chRet);
-            i++;
-        }
 
-    }
-    fprintf(stdout, "\n");*/
 }
 
 
