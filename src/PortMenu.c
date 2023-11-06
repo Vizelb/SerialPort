@@ -1,4 +1,5 @@
 #include "../inc/PortMenu.h"
+#include "../inc/ConsoleControl.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,45 +16,55 @@
 #include <stdbool.h>
 
 // 1 variant
-struct termios serial_settings;
+/*struct termios serial_settings;
 int serial_port;
-
-unsigned char bufrd[255];
+*/
 
 // 2 variant
 #include <windows.h>
 
-HANDLE hComm;
+unsigned char bufrd[255];
 
+HANDLE hComm;
 OVERLAPPED overlapped;
+
+const int READ_TIME = 100;
+OVERLAPPED sync = {0};
+int result = 0;
+unsigned long wait_s = 0;
+unsigned long read_s = 0;
+unsigned long state_s = 0;
 
 void InitPortMenu()
 {
     int i, j;
-    char temp = 'A';
+    //char temp = 'A';
     printf("Start\n");
-    printf("Let's go!!!\n");
 
-    //OpenSerialPort();
-    //ConfigurateSerialPort();
-
-
+    // #1
+    printf("Try to open port\n");
     if (!init_com_port())
     {
         printf("Error1\n");
         return;
     }
-    printf("Next1\n");
+
+    // #2
+    printf("Try to configurate port\n");
     if(!config_com_port())
     {
         printf("Error2\n");
         return;
     }
-    while (1)
-    {
-        TransmissionCycle();
-    }
 
+    // #3
+    printf("Work Cycle\n");
+    //while (1)
+    //{
+        TransmissionCycle();
+    //}
+
+    // #4
     printf("Prepare To Close Port\n");
     close_com_port();
     printf("End\n");
@@ -63,7 +74,15 @@ void InitPortMenu()
 
 void TransmissionCycle()
 {
-
+    int i;
+    uint8_t data[12];
+    for (i = 0; i < 12; i++)
+    {
+        data[i] = i;
+    }
+    printf("Input command\n");
+    //if (!(InputCommand() == 0x01))
+        //return;
 
     //sleep(1);
         printf("Prepare To Send\n");
@@ -72,6 +91,7 @@ void TransmissionCycle()
         //Sleep(1000);
         //printf("pospal");
         if(!send_char(0xFA))
+        //if(!send_array(data, 12))
         {
             printf("Error send_char 3\n");
             return;
@@ -92,7 +112,7 @@ void TransmissionCycle()
                 return;
             }
 
-        //sleep(1);
+        sleep(1);
 
 }
 
@@ -100,7 +120,8 @@ void TransmissionCycle()
 // 2 variant - работает
 BOOL init_com_port()
 {
-    hComm = CreateFile("COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+    //hComm = CreateFile("COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+    hComm = CreateFile("COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
     if (hComm == INVALID_HANDLE_VALUE)
     {
         printf("Error Error opening serial port\n");
@@ -121,6 +142,7 @@ BOOL config_com_port()
     dcbSerialParams.ByteSize = 8;
     dcbSerialParams.Parity = NOPARITY;
     dcbSerialParams.StopBits = ONESTOPBIT;
+    //dcbSerialParams.StopBits = TWOSTOPBITS;
 
     if (SetCommState(hComm, &dcbSerialParams) == FALSE)
         return FALSE;
@@ -142,6 +164,8 @@ BOOL send_char(uint8_t c)
     {
         data[i] = 0x01;
     }
+    data[0] = 0x79;
+    data[1] = 0x75;
 
     if (WriteFile(hComm,            // дескриптор устр
                   data,              // указатель на буфер
@@ -152,6 +176,26 @@ BOOL send_char(uint8_t c)
         return TRUE;
     else return FALSE;
 }
+
+
+BOOL send_array(uint8_t *dataArray, uint16_t arraySize)
+{
+    int i;
+    DWORD dwBytesWritten;
+    //char msg[] = {c, '\0'};
+    //uint8_t data[] = {c, '\0'};
+
+
+    if (WriteFile(hComm,            // дескриптор устр
+                  dataArray,              // указатель на буфер
+                  /*sizeof(dataArray)*/ arraySize,      // длина буфера
+                  &dwBytesWritten,  // кол-во записанных байтов
+                  NULL))            // overlapped атрибут
+        return TRUE;
+    else return FALSE;
+}
+
+
 
 BOOL read_com_port()
 {

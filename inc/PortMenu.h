@@ -23,6 +23,7 @@ void TransmissionCycle();
 BOOL init_com_port();
 BOOL config_com_port();
 BOOL send_char(uint8_t c);
+BOOL send_array(uint8_t *dataArray, uint16_t arraySize);
 BOOL read_com_port();
 void close_com_port();
 
