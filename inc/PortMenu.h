@@ -6,8 +6,10 @@
 
 #include <windows.h>
 
-#define SEIAL_PORT      "COM12"
-
+#define SERIAL_PORT         "COM4"
+#define BOAD_RATE           CBR_19200
+//#define BOAD_RATE           ((int) 19200)
+//#define SERIAL_PORT         ((LPCTSTR) COM4)
 
 // Methods
 void InitPortMenu();
@@ -19,7 +21,7 @@ void ConfigurateSerialPort();
 
 
 // 2 variant
-void TransmissionCycle();
+void WorkCycle();
 BOOL init_com_port();
 BOOL config_com_port();
 BOOL send_char(uint8_t c);
