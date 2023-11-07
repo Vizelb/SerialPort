@@ -3,12 +3,15 @@
 
 #include "inc/PortMenu.h"
 #include "inc/ConsoleControl.h"
+#include "inc/WorkWithFile.h"
 
 int main()
 {
-    InitPortMenu();
+    //InitPortMenu();
 
     //InitConsoleControl();
+
+    InitWorkWithFile();
 
     return 0;
 }
