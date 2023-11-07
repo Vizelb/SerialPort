@@ -64,15 +64,15 @@ void InitPortMenu()
 
     // #3
     printf("Work Cycle\n");
-    //while (1)
-    //{
-        //if (!(InputCommand() == '#')
-          //  WorkCycle();
-        //break;
-    repeatWork();
+    while (1)
+    {
+        if (!(InputCommand() == '#'))
+            WorkCycle();
+        else break;
+    //repeatWork();
 
         //BREAK_LINE();
-    //}
+    }
 
     // #4
     printf("Prepare To Close Port\n");
@@ -113,6 +113,8 @@ void WorkCycle()
         printf("Command Send\n");
         //BREAK_LINE();
 
+        //SetCommMask(hComm, EV_RXCHAR);
+
         printf("Prepare To Read\n");
         if(!read_com_port())
         {
@@ -122,11 +124,11 @@ void WorkCycle()
         //BREAK_LINE();
         //sleep(2);
 
-    repeatWork();
+    //repeatWork();
     return;
     ///////}
 
-    if(!send_char(0xFA))
+/*    if(!send_char(0xFA))
         //if(!send_array(data, 12))
     {
         printf("Error send_char 3\n");
@@ -144,7 +146,7 @@ void WorkCycle()
     }
 
     sleep(1);
-
+*/
 }
 
 
@@ -198,7 +200,7 @@ BOOL send_char(uint8_t c)
     }
     data[0] = 0x79;
     data[1] = 0x75;
-
+    PurgeComm(hComm, PURGE_TXABORT | PURGE_TXCLEAR);
     if (WriteFile(hComm,            // дескриптор устр
                   data,              // указатель на буфер
                   (DWORD)sizeof(data),      // длина буфера
@@ -212,7 +214,7 @@ BOOL send_char(uint8_t c)
     else return FALSE;
 }
 
-
+/*
 BOOL send_array(uint8_t *dataArray, uint16_t arraySize)
 {
     int i;
@@ -223,13 +225,13 @@ BOOL send_array(uint8_t *dataArray, uint16_t arraySize)
 
     if (WriteFile(hComm,            // дескриптор устр
                   dataArray,              // указатель на буфер
-                  /*sizeof(dataArray)*/ arraySize,      // длина буфера
+                  arraySize,      // длина буфера
                   &dwBytesWritten,  // кол-во записанных байтов
                   NULL))            // overlapped атрибут
         return TRUE;
     else return FALSE;
 }
-
+*/
 
 
 BOOL read_com_port()
@@ -262,14 +264,15 @@ BOOL read_com_port()
                 //printf(";");
             }
             //printf("\n%dx\n", &bufrd);
-            fprintf(stdout, "\n");
+            //fprintf(stdout, "\n");
+            printf("\n");
         }
     }
-    CloseHandle(sync.hEvent);
+    //CloseHandle(sync.hEvent);
     return;
 
 
-    signal = WaitForSingleObject(overlapped.hEvent, INFINITE);
+    /*signal = WaitForSingleObject(overlapped.hEvent, INFINITE);
 
     if (signal == WAIT_OBJECT_0)
     {
@@ -295,7 +298,7 @@ BOOL read_com_port()
             }
         }
     return TRUE;
-
+*/
 
 }
 

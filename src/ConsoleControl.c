@@ -25,16 +25,17 @@ void InitConsoleControl()
 
 uint8_t InputCommand()
 {
-    /*uint8_t command = 0;
-
+    uint8_t command = 0;
+/*
     scanf("%d", &command);
     printf("Command input - %X\n", command);
 
     return command;
     */
     printf("Input command\n");
-    char command = getchar();
-    printf("Command - %c\n", command);
+    //char command = getchar();
+    scanf("%d", &command);
+    printf("Command - %X\n", command);
     //if (command == '#')
     return command;
 }
