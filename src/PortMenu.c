@@ -68,7 +68,7 @@ void InitPortMenu()
     {
         if (!(InputCommand() == '#'))
             WorkCycle();
-         else break;
+        else break;
     //repeatWork();
 
         //BREAK_LINE();
@@ -93,26 +93,31 @@ void repeatWork()
 void WorkCycle()
 {
     int i;
-    uint8_t data[12];
+    uint8_t command[12];
+    uint8_t file[512];
     //char command;
 
     for (i = 0; i < 12; i++)
     {
-        data[i] = i;
+        command[i] = i;
     }
-    sleep(1);
+    for (i = 0; i < 512; i++)
+    {
+        file[i] = 0x5A;
+    }
+    //sleep(1);
     //while (1)
     //{
         printf("Prepare To Send Data\n");
         if(!send_char(0xFA))
-        //if(!send_array(data, 12))
+        //if(!send_array(command, 12))
         {
             printf("Error send_char 3\n");
             return;
         }
         printf("Command Send\n");
         //BREAK_LINE();
-        sleep(1);
+        //sleep(1);
         //SetCommMask(hComm, EV_RXCHAR);
 
         printf("Prepare To Read\n");
@@ -121,7 +126,18 @@ void WorkCycle()
             printf("Error read_com_port 4\n");
             return;
         }
-        sleep(1);
+
+        if(!send_array(file, 512))
+        {
+            printf("Error send_char 3\n");
+            return;
+        }
+        if(!read_com_port())
+        {
+            printf("Error read_com_port 4\n");
+            return;
+        }
+        //sleep(1);
         //BREAK_LINE();
         //sleep(2);
 
@@ -190,11 +206,11 @@ BOOL config_com_port()
 BOOL send_char(uint8_t c)
 {
     int i;
-    DWORD dwBytesWritten;
+    DWORD dwBytesWritten = 12;
     DWORD feedBack;
     //char msg[] = {c, '\0'};
     //uint8_t data[] = {c, '\0'};
-    uint8_t data[10];// = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,'\0'};
+    uint8_t data[12];// = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,'\0'};
     for (i = 0; i < sizeof(data); i++)
     {
         data[i] = 0x01;
@@ -204,10 +220,10 @@ BOOL send_char(uint8_t c)
     //PurgeComm(hComm, PURGE_TXABORT | PURGE_TXCLEAR);
     if (WriteFile(hComm,            // дескриптор устр
                   data,              // указатель на буфер
-                  12,//(DWORD)sizeof(data),      // длина буфера
+                  (DWORD)sizeof(data),      // длина буфера
                   &dwBytesWritten,  // кол-во записанных байтов
                   NULL)             // overlapped атрибут
-        //|| feedBack != (DWORD)sizeof(data)
+        || feedBack != (DWORD)sizeof(data)
         )
         {
         return TRUE;
@@ -215,24 +231,28 @@ BOOL send_char(uint8_t c)
     else return FALSE;
 }
 
-/*
+
 BOOL send_array(uint8_t *dataArray, uint16_t arraySize)
 {
     int i;
     DWORD dwBytesWritten;
-    //char msg[] = {c, '\0'};
-    //uint8_t data[] = {c, '\0'};
-
+    DWORD feedBack;
 
     if (WriteFile(hComm,            // дескриптор устр
                   dataArray,              // указатель на буфер
-                  arraySize,      // длина буфера
+                  arraySize,//(DWORD)sizeof(dataArray),      // длина буфера
                   &dwBytesWritten,  // кол-во записанных байтов
-                  NULL))            // overlapped атрибут
+                  NULL)             // overlapped атрибут
+        || feedBack != (DWORD)sizeof(dataArray)
+        )
+        {
         return TRUE;
+        }
     else return FALSE;
+    //if (WriteFile())
+    //if (TransmitFile(hComm, ))
 }
-*/
+
 
 
 BOOL read_com_port()
@@ -261,7 +281,7 @@ BOOL read_com_port()
                     result = temp;
             for (i = 0; i < temp; i++)
             {
-                printf("%X", bufrd[i]);
+                printf("%X, ", bufrd[i]);
                 //printf(";");
             }
             //printf("\n%dx\n", &bufrd);
