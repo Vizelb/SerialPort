@@ -7,11 +7,11 @@
 
 int main()
 {
-    //InitPortMenu();
+    InitPortMenu();
 
     //InitConsoleControl();
 
-    InitWorkWithFile();
+    //InitWorkWithFile();
 
     return 0;
 }

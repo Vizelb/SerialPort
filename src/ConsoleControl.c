@@ -14,7 +14,7 @@
 
 #include <stdbool.h>
 
-uint8_t InputCommand();
+
 
 
 void InitConsoleControl()

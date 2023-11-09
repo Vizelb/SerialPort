@@ -26,11 +26,13 @@ int serial_port;
 #define BREAK_LINE()    printf("//////// ////////\n\n")
 
 unsigned char bufrd[255];
+unsigned char answerCommand[12];
 
 HANDLE hComm;
 OVERLAPPED overlapped;
 
-const int READ_TIME = 100;
+const int READ_TIME_COMMAND = 100;
+const int READ_TIME_DATA = 500;
 OVERLAPPED sync = {0};
 int result = 0;
 unsigned long wait_s = 0;
@@ -40,7 +42,7 @@ unsigned long state_s = 0;
 void InitPortMenu()
 {
     int i, j;
-    //char temp = 'A';
+
     printf("Start\n");
     BREAK_LINE();
 
@@ -63,18 +65,23 @@ void InitPortMenu()
     BREAK_LINE();
 
     // #3
-    printf("Work Cycle\n");
-    while (1)
+    printf("Start Work\n");
+    if(InputCommand() == 1)
     {
-        if (!(InputCommand() == '#'))
-            WorkCycle();
-        else break;
-    //repeatWork();
-
-        //BREAK_LINE();
+        if (!WorkCycle())
+        {
+            printf("\nERROR COMMAND\n");
+            return;
+        }
+        if (!InitWorkWithFile())
+        {
+            printf("\nERROR FILE\n");
+            return;
+        }
     }
 
     // #4
+    BREAK_LINE();
     printf("Prepare To Close Port\n");
     close_com_port();
     printf("End\n");
@@ -82,38 +89,25 @@ void InitPortMenu()
 
 }
 
-void repeatWork()
-{
-    if (InputCommand() != '#')
-        WorkCycle();
-    return;
-}
 
-
-void WorkCycle()
+BOOL WorkCycle()
 {
     int i;
     uint8_t command[12];
-    uint8_t file[512];
-    //char command;
 
     for (i = 0; i < 12; i++)
     {
         command[i] = i;
     }
-    for (i = 0; i < 512; i++)
-    {
-        file[i] = 0x5A;
-    }
     //sleep(1);
     //while (1)
     //{
-        printf("Prepare To Send Data\n");
+        printf("Prepare To Send Data Command\n");
         if(!send_char(0xFA))
         //if(!send_array(command, 12))
         {
-            printf("Error send_char 3\n");
-            return;
+            printf("Error send char Command 3\n");
+            return FALSE;
         }
         printf("Command Send\n");
         //BREAK_LINE();
@@ -121,49 +115,17 @@ void WorkCycle()
         //SetCommMask(hComm, EV_RXCHAR);
 
         printf("Prepare To Read\n");
-        if(!read_com_port())
+        if(!read_command_com_port())
         {
-            printf("Error read_com_port 4\n");
-            return;
+            printf("Error read com port Command\n");
+            return FALSE;
         }
-
-        if(!send_array(file, 512))
+        if(!CheckAnswerCommand())
         {
-            printf("Error send_char 3\n");
-            return;
+            printf("Error Control Command\n");
+            return FALSE;
         }
-        if(!read_com_port())
-        {
-            printf("Error read_com_port 4\n");
-            return;
-        }
-        //sleep(1);
-        //BREAK_LINE();
-        //sleep(2);
-
-    //repeatWork();
-    return;
-    ///////}
-
-/*    if(!send_char(0xFA))
-        //if(!send_array(data, 12))
-    {
-        printf("Error send_char 3\n");
-        return;
-    }
-
-    printf("Prepare To Read\n");
-    //SetCommMask(HANDLE hComm, DWORD dwEvtMask);
-    //SetCommMask(hComm, EV_RXCHAR);
-
-    if(!read_com_port())
-    {
-        printf("Error read_com_port 4\n");
-        return;
-    }
-
-    sleep(1);
-*/
+    return TRUE;
 }
 
 
@@ -253,7 +215,106 @@ BOOL send_array(uint8_t *dataArray, uint16_t arraySize)
     //if (TransmitFile(hComm, ))
 }
 
+BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *answerMk)
+{
 
+    if(!send_array(dataArray, arraySize))
+    {
+        printf("\nError send array\n");
+        return FALSE;
+    }
+
+    if(!read_data_array_com_port(answerMk))
+    {
+        printf("Error read com port\n");
+        return FALSE;
+    }
+    return TRUE;
+}
+
+BOOL read_data_array_com_port(uint8_t *answerMk)
+{
+
+    int i = 0;
+
+    COMSTAT comstat;
+
+    DWORD dwBytesRead = 0;          // кол-во прочитанных байтов
+    DWORD btr = 12;
+    DWORD temp, mask, signal;
+    //overlapped.hEvent = CreateEvent (NULL, true, true, NULL);
+
+    sync.hEvent = CreateEvent (NULL, TRUE, FALSE, NULL);
+    if (SetCommMask(hComm, EV_RXCHAR))
+    {
+        WaitCommEvent(hComm, &state_s, &sync);
+        wait_s = WaitForSingleObject(sync.hEvent, READ_TIME_DATA);
+        if (wait_s == WAIT_OBJECT_0)
+        {
+            ReadFile(hComm, answerMk, btr, &temp, &sync);
+            wait_s = WaitForSingleObject(sync.hEvent, READ_TIME_DATA);
+            if (wait_s == WAIT_OBJECT_0)
+            {
+                if (GetOverlappedResult(hComm, &sync, &temp, FALSE))
+                {
+                    result = temp;
+                } else return FALSE;
+            } else return FALSE;
+            for (i = 0; i < temp; i++)
+            {
+                printf("%X, ", answerMk[i]);
+            }
+            printf("\n");
+        } else return FALSE;
+    } else return FALSE;
+    //CloseHandle(sync.hEvent);
+    return TRUE;
+}
+
+BOOL read_command_com_port()
+{
+    uint8_t chRet = '\0';
+    int i = 0;
+
+    COMSTAT comstat;
+
+    DWORD dwBytesRead = 0;          // кол-во прочитанных байтов
+    DWORD btr = 12;
+    DWORD temp, mask, signal;
+    //overlapped.hEvent = CreateEvent (NULL, true, true, NULL);
+
+    sync.hEvent = CreateEvent (NULL, TRUE, FALSE, NULL);
+    if (SetCommMask(hComm, EV_RXCHAR))
+    {
+        WaitCommEvent(hComm, &state_s, &sync);
+        wait_s = WaitForSingleObject(sync.hEvent, READ_TIME_COMMAND);
+        if (wait_s == WAIT_OBJECT_0)
+        {
+            ReadFile(hComm, answerCommand, btr, &temp, &sync);
+            wait_s = WaitForSingleObject(sync.hEvent, READ_TIME_COMMAND);
+            if (wait_s == WAIT_OBJECT_0)
+                if (GetOverlappedResult(hComm, &sync, &temp, FALSE))
+                    result = temp;
+            for (i = 0; i < temp; i++)
+            {
+                printf("%X, ", answerCommand[i]);
+                //printf(";");
+            }
+            //printf("\n%dx\n", &answerCommand);
+            //fprintf(stdout, "\n");
+            printf("\n");
+        }
+    }
+    //CloseHandle(sync.hEvent);
+    return;
+}
+
+BOOL CheckAnswerCommand()
+{
+    if ((answerCommand[0] != 0x55) && (answerCommand[10] != 0x79) && (answerCommand[11] != 0x75))
+        return FALSE;
+    return TRUE;
+}
 
 BOOL read_com_port()
 {
@@ -271,11 +332,11 @@ BOOL read_com_port()
     if (SetCommMask(hComm, EV_RXCHAR))
     {
         WaitCommEvent(hComm, &state_s, &sync);
-        wait_s = WaitForSingleObject(sync.hEvent, READ_TIME);
+        wait_s = WaitForSingleObject(sync.hEvent, READ_TIME_COMMAND);
         if (wait_s == WAIT_OBJECT_0)
         {
             ReadFile(hComm, bufrd, btr, &temp, &sync);
-            wait_s = WaitForSingleObject(sync.hEvent, READ_TIME);
+            wait_s = WaitForSingleObject(sync.hEvent, READ_TIME_COMMAND);
             if (wait_s == WAIT_OBJECT_0)
                 if (GetOverlappedResult(hComm, &sync, &temp, FALSE))
                     result = temp;

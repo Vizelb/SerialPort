@@ -6,9 +6,9 @@
 #include <windows.h>
 
 
-void InitWorkWithFile();
+BOOL InitWorkWithFile();
 BOOL OpenFileForPort();
-void ReadFromFile();
+BOOL ReadFromFile();
 
 void GetFileSizeMy();
 

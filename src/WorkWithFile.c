@@ -1,5 +1,6 @@
 
 #include "../inc/WorkWithFile.h"
+#include "../inc/PortMenu.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,6 +22,7 @@ char nameHEX[] = "D:/Danya/Libary/C/ComPortFilesForTest/1986BE91T_DEMO.HEX";
 uint8_t bufferPlis[77655];
 int counterPlis = 0;
 uint8_t bufferRead[512];
+uint8_t answerMk[12];
 
 char c;
 int num;
@@ -28,38 +30,28 @@ int num;
 //fopen(D:\Danya\Libary\C\test1, "r");  // открыть файл (имя, на чтение)
 //fopen(D:/Danya/Libary/C/test1, "r");  // открыть файл (имя, на чтение)
 
-void InitWorkWithFile()
+BOOL InitWorkWithFile()
 {
     int i;
 
     if (!OpenFileForPort())
-        return;
+        return FALSE;
 
-    ReadFromFile();
+    if(!ReadFromFile())
+        return FALSE;
 
-    GetFileSizeMy();
+    //GetFileSizeMy();
 
     fclose(file);     // закрытие файла
 
-    printf("\n\n\n\n END");
+    printf("\n\n\n\n END OF WORK WRITE/READ FILE");
     /*for(i = 0; i < bufferCounter; i++)
         printf("%02x", buffer[i]);*/
 
-
-
-}
-
-void StringParse()
-{
-    // 1 byte   - size
-    // 2-3      - addr
-    // 4        - service
-    // 5 - size - data
-    // 5 + size - ks
-    // summ = 5 + size
-
+    return TRUE;
 
 }
+
 
 void GetFileSizeMy()
 {
@@ -70,7 +62,7 @@ void GetFileSizeMy()
 
 }
 
-void ReadFromFile()
+BOOL ReadFromFile()
 {
     int i;
     uint8_t stringSize;
@@ -81,8 +73,6 @@ void ReadFromFile()
     while (!feof(file))
     {
         sizeRead = fread(&bufferRead, sizeof(uint8_t), 512, file);
-        //i = 0;
-        //printf("%c", bufferRead[0]);
 
         for(i = 0; i < sizeof(bufferRead); i++)
         {
@@ -90,15 +80,20 @@ void ReadFromFile()
             bufferPlis[counterPlis] = bufferRead[i];
             counterPlis++;
         }
-        // test format
+        TransmitPartOfProshivka(bufferRead, sizeof(bufferRead), answerMk);
+
+
+        // #test format
         //if(bufferRead[1] == 50)//0x32 )
             //printf("\nTRUE\n");
 
         //printf("\n%d\n", sizeRead);
+        if(answerMk[0] != 0xAA && answerMk[10] != 0x79 && answerMk[11] != 0x75)
+            return FALSE;
         if(sizeRead < 512)
         {
             printf("\nEnd of Reading");
-            return;
+            return FALSE;
         }
         /*if( feof (file) != 0)
         {
@@ -106,6 +101,7 @@ void ReadFromFile()
             return;
         }*/
     }
+    return TRUE;
 }
 
 BOOL OpenFileForPort()
@@ -113,7 +109,8 @@ BOOL OpenFileForPort()
     int sizefiletowrite;
     //int fileSize;
     //file = fopen("D:/Danya/Libary/C/test1.txt", "r");
-    file = fopen(proshivkaMk, "rb");
+    //file = fopen(proshivkaMk, "rb");
+    file = fopen(proshivkaPlis, "rb");
 
     if (file == NULL)
     {
@@ -191,3 +188,17 @@ void to_hex_16(char *output, unsigned n)
     output[3] = hex_digit[n & 0xf];
     output[4] = '\0';
 }
+
+
+
+void StringParse()
+{
+    // 1 byte   - size
+    // 2-3      - addr
+    // 4        - service
+    // 5 - size - data
+    // 5 + size - ks
+    // summ = 5 + size
+}
+
+
