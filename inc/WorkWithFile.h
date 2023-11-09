@@ -10,5 +10,13 @@ void InitWorkWithFile();
 BOOL OpenFileForPort();
 void ReadFromFile();
 
+void GetFileSizeMy();
+
+int hex_to_int(char c);
+int hex_to_ascii(char c, char d);
+
+int hexChrBin(const char hex, char *out);
+void to_hex_16(char *output, unsigned n);
+
 
 #endif
