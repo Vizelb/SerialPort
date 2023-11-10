@@ -67,6 +67,8 @@ BOOL ReadFromFile()
     int i;
     uint8_t stringSize;
     uint32_t sizeRead;
+
+    uint32_t senderCounter = 0;
     //char bufferTem[256];
     //char buf = 0;
 
@@ -76,12 +78,13 @@ BOOL ReadFromFile()
 
         for(i = 0; i < sizeof(bufferRead); i++)
         {
-            printf("%x ", bufferRead[i]);   // d - print in hex
+            //printf("%x ", bufferRead[i]);   // d - print in hex
             bufferPlis[counterPlis] = bufferRead[i];
             counterPlis++;
         }
         TransmitPartOfProshivka(bufferRead, sizeof(bufferRead), answerMk);
-
+        senderCounter++;
+        printf("\nSumm of Transaction = %d, Current Addr = %x", senderCounter, counterPlis);
 
         // #test format
         //if(bufferRead[1] == 50)//0x32 )
@@ -109,8 +112,8 @@ BOOL OpenFileForPort()
     int sizefiletowrite;
     //int fileSize;
     //file = fopen("D:/Danya/Libary/C/test1.txt", "r");
-    //file = fopen(proshivkaMk, "rb");
-    file = fopen(proshivkaPlis, "rb");
+    file = fopen(proshivkaMk, "rb");
+    //file = fopen(proshivkaPlis, "rb");
 
     if (file == NULL)
     {

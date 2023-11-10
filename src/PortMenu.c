@@ -114,12 +114,15 @@ BOOL WorkCycle()
         //sleep(1);
         //SetCommMask(hComm, EV_RXCHAR);
 
+        CancelIoEx(hComm, NULL);
+
         printf("Prepare To Read\n");
         if(!read_command_com_port())
         {
             printf("Error read com port Command\n");
             return FALSE;
         }
+        CancelIoEx(hComm, NULL);
         if(!CheckAnswerCommand())
         {
             printf("Error Control Command\n");
@@ -132,7 +135,8 @@ BOOL WorkCycle()
 // 2 variant - ‡·ÓÚ‡ÂÚ
 BOOL init_com_port()
 {
-    hComm = CreateFile("COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+    hComm = CreateFile("COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL); // –¿¡Œ“¿≈“ ÕŒ  –»¬Œ
+    //hComm = CreateFile("COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     //hComm = CreateFile(/*SERIAL_PORT*/"COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
     if (hComm == INVALID_HANDLE_VALUE)
     {
@@ -260,11 +264,12 @@ BOOL read_data_array_com_port(uint8_t *answerMk)
                     result = temp;
                 } else return FALSE;
             } else return FALSE;
+            printf("\n\n");
             for (i = 0; i < temp; i++)
             {
                 printf("%X, ", answerMk[i]);
             }
-            printf("\n");
+            printf("\n\n");
         } else return FALSE;
     } else return FALSE;
     //CloseHandle(sync.hEvent);
