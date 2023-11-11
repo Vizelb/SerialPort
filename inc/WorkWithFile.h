@@ -10,7 +10,7 @@ BOOL InitWorkWithFile();
 BOOL OpenFileForPort();
 BOOL ReadFromFile();
 
-void GetFileSizeMy();
+uint32_t GetFileSizeMy();
 
 int hex_to_int(char c);
 int hex_to_ascii(char c, char d);

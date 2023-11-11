@@ -19,8 +19,8 @@ char nameHEX[] = "D:/Danya/Libary/C/ComPortFilesForTest/1986BE91T_DEMO.HEX";
 //uint32_t buffer[128];
 
 //uint8_t buffer[192518];
-uint8_t bufferPlis[77655];
-int counterPlis = 0;
+//uint8_t bufferPlis[77655];
+uint32_t counterPlis = 0;
 uint8_t bufferRead[512];
 uint8_t answerMk[12];
 
@@ -53,57 +53,122 @@ BOOL InitWorkWithFile()
 }
 
 
-void GetFileSizeMy()
+uint32_t GetFileSizeMy()
 {
     fseek(file, 0, SEEK_END);
     long fileSize = ftell(file);
     rewind(file);
     printf("\n%d\n", fileSize);
-
+    return fileSize;
 }
 
 BOOL ReadFromFile()
 {
-    int i;
+    int i, j;
     uint8_t stringSize;
     uint32_t sizeRead;
 
     uint32_t senderCounter = 0;
+    uint32_t summaryFileRead = 0;
     //char bufferTem[256];
     //char buf = 0;
+    uint32_t kolvoByte = 0;
+    uint32_t numberFullCycle = 0;
+    uint32_t numberOstatok = 0;
 
-    while (!feof(file))
+    int cheZaNumber = 0;
+
+    kolvoByte = GetFileSizeMy();
+    numberFullCycle = kolvoByte / 65535;
+    numberOstatok = kolvoByte - (numberFullCycle * 65535) ;
+
+
+    //while (!feof(file))
+    for(j = 0; j < numberFullCycle; j++)
     {
-        sizeRead = fread(&bufferRead, sizeof(uint8_t), 512, file);
-
-        for(i = 0; i < sizeof(bufferRead); i++)
+        summaryFileRead = 0;
+        while(summaryFileRead < 65536)
         {
-            //printf("%x ", bufferRead[i]);   // d - print in hex
-            bufferPlis[counterPlis] = bufferRead[i];
-            counterPlis++;
-        }
-        TransmitPartOfProshivka(bufferRead, sizeof(bufferRead), answerMk);
-        senderCounter++;
-        printf("\nSumm of Transaction = %d, Current Addr = %x", senderCounter, counterPlis);
+            cheZaNumber= fseek(file, j*65536+summaryFileRead, SEEK_SET);
+            sizeRead = fread(&bufferRead, sizeof(uint8_t), 512, file);
+            summaryFileRead += sizeRead;
+            for(i = 0; i < sizeof(bufferRead); i++)
+            {
+                //printf("%x ", bufferRead[i]);   // d - print in hex
+                //bufferPlis[counterPlis] = bufferRead[i];
+                counterPlis++;
+            }
+            TransmitPartOfProshivka(bufferRead, sizeof(bufferRead), answerMk);
+            senderCounter++;
+            printf("\nSumm of Transaction = %d, Current Addr = %x", senderCounter, counterPlis);
+            printf("\nSumm File Bytes = %d, Skolko prochitali = %d ", summaryFileRead, sizeRead);
+            printf("\nFile Size = , delitel/j = %d",  j);
+            if(counterPlis == 0xFFFF)
+            {
 
+            }
         // #test format
         //if(bufferRead[1] == 50)//0x32 )
             //printf("\nTRUE\n");
 
         //printf("\n%d\n", sizeRead);
-        if(answerMk[0] != 0xAA && answerMk[10] != 0x79 && answerMk[11] != 0x75)
-            return FALSE;
-        if(sizeRead < 512)
-        {
-            printf("\nEnd of Reading");
-            return FALSE;
-        }
+            if(answerMk[0] != 0xAA && answerMk[10] != 0x79 && answerMk[11] != 0x75)
+            {
+                printf("ERROR TRANSACTION");
+                return FALSE;
+            }
+            if(sizeRead < 512)
+            {
+                printf("\n ERROR End of Reading");
+                return FALSE;
+            }
         /*if( feof (file) != 0)
         {
             printf("\nEnd of Reading");
             return;
         }*/
+        }
     }
+
+    if (numberOstatok != 0)
+    {
+        printf("\n ZASHLI v obrabotchik\n");
+        printf("\nFile Size = , delitel/j = %d\n",  j);
+        summaryFileRead = 0;
+
+        while(summaryFileRead < numberOstatok)//!feof(file))
+        {
+            cheZaNumber= fseek(file, j*65536+summaryFileRead, SEEK_SET);
+            printf("\n Number-shmumber = %d\n", cheZaNumber);
+            sizeRead = fread(&bufferRead, sizeof(uint8_t), 512, file);
+            summaryFileRead += sizeRead;
+            for(i = 0; i < sizeof(bufferRead); i++)
+            {
+                //printf("%x ", bufferRead[i]);   // d - print in hex
+                //bufferPlis[counterPlis] = bufferRead[i];
+                counterPlis++;
+            }
+            TransmitPartOfProshivka(bufferRead, sizeof(bufferRead), answerMk);
+            senderCounter++;
+            printf("\nSumm of Transaction = %d, Current Addr = %x", senderCounter, counterPlis);
+            printf("\nSumm File Bytes = %d, Skolko prochitali = %d ", summaryFileRead, sizeRead);
+            printf("\nFile Size = %d, delitel = %d", GetFileSizeMy(), GetFileSizeMy() / 65535);
+            printf("\nFile Size = , delitel/j = %d",  j);
+
+            if(answerMk[0] != 0xAA && answerMk[10] != 0x79 && answerMk[11] != 0x75)
+            {
+                printf("ERROR TRANSACTION");
+                return FALSE;
+            }
+            if(sizeRead < 512)
+            {
+                printf("\n ERROR End of Reading");
+                return FALSE;
+            }
+        }
+    }
+
+    printf("END OF FILE");
     return TRUE;
 }
 

@@ -154,7 +154,7 @@ BOOL config_com_port()
     if (GetCommState(hComm, &dcbSerialParams) == FALSE)
         return FALSE;
 
-    dcbSerialParams.BaudRate = CBR_19200;
+    dcbSerialParams.BaudRate = CBR_115200; //CBR_19200;
     dcbSerialParams.ByteSize = 8;
     dcbSerialParams.Parity = NOPARITY;
     dcbSerialParams.StopBits = ONESTOPBIT;
