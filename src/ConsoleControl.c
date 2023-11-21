@@ -33,6 +33,7 @@ uint8_t InputCommand()
     return command;
     */
     printf("Input command\n");
+    printf("1 - download driver for PLIS1 in MM935\n");
     //char command = getchar();
     scanf("%d", &command);
     printf("Command - %X\n", command);

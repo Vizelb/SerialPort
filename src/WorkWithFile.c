@@ -11,10 +11,12 @@
 
 
 FILE *file;
-char name[] = "test1.txt";
+char nameTxt[] = "test3.txt";
 char nameTestHex[] = "D:/Danya/Libary/C/test1.HEX";
 char proshivkaMk[] = "D:/Danya/Libary/C/generateFile";
+char imitPlis[] = "D:/Danya/Libary/C/imitPlis";
 char proshivkaPlis[] = "D:/Danya/Libary/C/test4.rbf";
+char testNewFile[] = "D:/Danya/Libary/C/testNewFile.txt";
 char nameHEX[] = "D:/Danya/Libary/C/ComPortFilesForTest/1986BE91T_DEMO.HEX";
 //uint32_t buffer[128];
 
@@ -177,8 +179,11 @@ BOOL OpenFileForPort()
     int sizefiletowrite;
     //int fileSize;
     //file = fopen("D:/Danya/Libary/C/test1.txt", "r");
-    file = fopen(proshivkaMk, "rb");
-    //file = fopen(proshivkaPlis, "rb");
+    //file = fopen(proshivkaMk, "rb");
+    //file = fopen(imitPlis, "rb");
+    file = fopen(proshivkaPlis, "rb");
+    //file = fopen(testNewFile, "rb");
+    //file = fopen(nameTxt, "rb");
 
     if (file == NULL)
     {
