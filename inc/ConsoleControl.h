@@ -9,7 +9,7 @@
 void InitConsoleControl();
 uint8_t InputCommand();
 
-BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis);
+
 
 
 #endif

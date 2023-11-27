@@ -1,5 +1,7 @@
 #include "../inc/PortMenu.h"
 #include "../inc/ConsoleControl.h"
+#include "../inc/LoaderControl.h"
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,7 +74,8 @@ void InitPortMenu()
     commandPlis = InputCommand();
     if(CheckCurrentPlis(commandPlis, &currentPlis))
     {
-        if (!WorkCycle())
+        //if (!WorkCycle())
+        if (!InitLoaderControl(hComm, currentPlis))
         {
             printf("\nERROR WORK CYCLE\n");
             return;
@@ -98,7 +101,7 @@ void InitPortMenu()
 BOOL WorkCycle()
 {
     int i;
-    uint8_t command[12];
+    uint8_t command[14];
 
     for (i = 0; i < 12; i++)
     {

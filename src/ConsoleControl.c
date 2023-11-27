@@ -42,33 +42,5 @@ uint8_t InputCommand()
     return command;
 }
 
-BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis)
-{
-    if (command == 1)
-    {
-        *currentPlis = PLIS1;
-        return TRUE;
-    }
-    if (command == 2)
-    {
-        *currentPlis = PLIS2;
-        return TRUE;
-    }
-    if (command == 3)
-    {
-        *currentPlis = PLIS_CYCLONE;
-        return TRUE;
-    }
-    if (command == 4)
-    {
-        *currentPlis = PLIS3;
-        return TRUE;
-    }
-    if (command == 5)
-    {
-        *currentPlis = PLIS4;
-        return TRUE;
-    }
-    retur FALSE;
-}
+
 
