@@ -24,34 +24,46 @@ uint32_t addrFilePlisInDk;
 
 BOOL InitLoaderControl(HANDLE hComm, uint32_t currentPlis)
 {
+    if (!StartConnection(hComm, currentPlis))
+    {
+        printf("\nERROR WORK CYCLE\n");
+        return FALSE;
+    }
+    if (!TransmitDataFile(hComm))
+    {
+        printf("\nERROR WORK FILE\n");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+BOOL StartConnection(HANDLE hComm, uint32_t currentPlis)
+{
     int i;
     uint8_t command[14];
+    uint8_t commandAnswer[14];
 
     FormCommand(command, currentPlis);
 
-
     printf("Prepare To Send Data Command\n");
-    if(!send_char(0xFA))
-    //if(!send_array(command, 12))
+    if(!send_command(command))
     {
         printf("Error send char Command 3\n");
         return FALSE;
     }
     printf("Command Send\n");
-    //BREAK_LINE();
-    //sleep(1);
-    //SetCommMask(hComm, EV_RXCHAR);
 
     CancelIoEx(hComm, NULL);
 
     printf("Prepare To Read\n");
-    if(!read_command_com_port())
+    if(!read_command_com_port(commandAnswer))
     {
         printf("Error read com port Command\n");
         return FALSE;
     }
     CancelIoEx(hComm, NULL);
-    if(!CheckAnswerCommand())
+    if(!CheckAnswerCommand(commandAnswer, currentPlis))
     {
         printf("Error Control Command\n");
         return FALSE;
@@ -59,13 +71,18 @@ BOOL InitLoaderControl(HANDLE hComm, uint32_t currentPlis)
     return TRUE;
 }
 
+BOOL TransmitDataFile(HANDLE hComm)
+{
+
+    return TRUE;
+}
+
 void FormCommand(uint8_t *command, uint32_t currentPlis)
 {
-    int i;
     uint32_t crc32;
     struct CommandToMk headCommand;
 
-    headCommand.command.bytes.code = KKU;
+    headCommand.command.bytes.code = K_K_UPR;
     headCommand.command.bytes.plisNumber = currentPlis;
 
     if (currentPlis != PLIS_CYCLONE)
@@ -94,9 +111,7 @@ void FormCommand(uint8_t *command, uint32_t currentPlis)
     headCommand.command.bytes.Crc32[2] = crc32 << 16;
     headCommand.command.bytes.Crc32[3] = crc32 << 24;
 
-
-    //for (i = 0; i < 14; i++)
-        command = headCommand.command.value;
+    command = headCommand.command.value;
 }
 
 BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis)
@@ -134,7 +149,26 @@ BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis)
     return FALSE;
 }
 
+BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint32_t currentPlis)
+{
+    int i;
+    uint32_t crc32;
+    struct AnswerFromMk headAnswer;
 
+    for (i = 0; i < 14; i++)
+        headAnswer.answer.value[i] = commandAnswer[i];
+    if (headAnswer.answer.bytes.code != K_KVIT)
+        return FALSE;
+    if (headAnswer.answer.bytes.plisNumber != currentPlis)
+        return FALSE;
+    if (headAnswer.answer.bytes.emptyBytes != 0x00)
+        return FALSE;
+    crc32 = CRC32(headAnswer.answer.value, 10);
+    if(!CheckCRC32(crc32, headAnswer.answer.bytes.Crc32))
+        return FALSE;
+
+    return TRUE;
+}
 
 
 

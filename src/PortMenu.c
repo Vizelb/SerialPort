@@ -100,7 +100,7 @@ void InitPortMenu()
 
 BOOL WorkCycle()
 {
-    int i;
+    /*int i;
     uint8_t command[14];
 
     for (i = 0; i < 12; i++)
@@ -111,7 +111,7 @@ BOOL WorkCycle()
     //while (1)
     //{
         printf("Prepare To Send Data Command\n");
-        if(!send_char(0xFA))
+        if(!send_command(command))
         //if(!send_array(command, 12))
         {
             printf("Error send char Command 3\n");
@@ -125,7 +125,7 @@ BOOL WorkCycle()
         CancelIoEx(hComm, NULL);
 
         printf("Prepare To Read\n");
-        if(!read_command_com_port())
+        if(!read_command_com_port(command))
         {
             printf("Error read com port Command\n");
             return FALSE;
@@ -136,7 +136,7 @@ BOOL WorkCycle()
             printf("Error Control Command\n");
             return FALSE;
         }
-    return TRUE;
+    return TRUE;*/
 }
 
 
@@ -177,20 +177,20 @@ BOOL config_com_port()
 
 
 
-BOOL send_char(uint8_t c)
+BOOL send_command(uint8_t *data)
 {
     int i;
-    DWORD dwBytesWritten = 12;
+    DWORD dwBytesWritten = 14;
     DWORD feedBack;
     //char msg[] = {c, '\0'};
     //uint8_t data[] = {c, '\0'};
-    uint8_t data[12];// = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,'\0'};
-    for (i = 0; i < sizeof(data); i++)
+    //uint8_t data[12];// = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,'\0'};
+    /*for (i = 0; i < sizeof(data); i++)
     {
         data[i] = 0xFF;     // открывать файл заранее; здесь передавать размер файла и адрес куда записывать
     }
     data[10] = 0x79;
-    data[11] = 0x75;
+    data[11] = 0x75;*/
     //PurgeComm(hComm, PURGE_TXABORT | PURGE_TXCLEAR);
     if (WriteFile(hComm,            // дескриптор устр
                   data,              // указатель на буфер
@@ -284,7 +284,7 @@ BOOL read_data_array_com_port(uint8_t *answerMk)
     return TRUE;
 }
 
-BOOL read_command_com_port()
+BOOL read_command_com_port(uint8_t *data)
 {
     uint8_t chRet = '\0';
     int i = 0;
@@ -292,7 +292,7 @@ BOOL read_command_com_port()
     COMSTAT comstat;
 
     DWORD dwBytesRead = 0;          // кол-во прочитанных байтов
-    DWORD btr = 12;
+    DWORD btr = 14;
     DWORD temp, mask, signal;
     //overlapped.hEvent = CreateEvent (NULL, true, true, NULL);
 
@@ -303,31 +303,26 @@ BOOL read_command_com_port()
         wait_s = WaitForSingleObject(sync.hEvent, READ_TIME_COMMAND);
         if (wait_s == WAIT_OBJECT_0)
         {
-            ReadFile(hComm, answerCommand, btr, &temp, &sync);
+            ReadFile(hComm, data, btr, &temp, &sync);
             wait_s = WaitForSingleObject(sync.hEvent, READ_TIME_COMMAND);
             if (wait_s == WAIT_OBJECT_0)
                 if (GetOverlappedResult(hComm, &sync, &temp, FALSE))
                     result = temp;
             for (i = 0; i < temp; i++)
             {
-                printf("%X, ", answerCommand[i]);
+                printf("%X, ", data[i]);
                 //printf(";");
             }
-            //printf("\n%dx\n", &answerCommand);
+            //printf("\n%dx\n", &data);
             //fprintf(stdout, "\n");
             printf("\n");
-        }
-    }
+        } else return FALSE;
+    } else return FALSE;
     //CloseHandle(sync.hEvent);
-    return;
-}
-
-BOOL CheckAnswerCommand()
-{
-    if ((answerCommand[0] != 0x55) && (answerCommand[10] != 0x79) && (answerCommand[11] != 0x75))
-        return FALSE;
     return TRUE;
 }
+
+
 
 BOOL read_com_port()
 {
