@@ -11,6 +11,12 @@
 //#define BOAD_RATE           ((int) 19200)
 //#define SERIAL_PORT         ((LPCTSTR) COM4)
 
+#define PLIS1               ((uint32_t) 0x6000)
+#define PLIS2               ((uint32_t) 0x7000)
+#define PLIS_CYCLONE        ((uint32_t) 0x8000)
+#define PLIS3               ((uint32_t) 0x9000)
+#define PLIS4               ((uint32_t) 0xA000)
+
 // Methods
 void InitPortMenu();
 

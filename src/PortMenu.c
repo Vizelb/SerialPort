@@ -39,6 +39,9 @@ unsigned long wait_s = 0;
 unsigned long read_s = 0;
 unsigned long state_s = 0;
 
+uint32_t currentPlis;
+uint32_t commandPlis;
+
 void InitPortMenu()
 {
     int i, j;
@@ -66,19 +69,21 @@ void InitPortMenu()
 
     // #3
     printf("Start Work\n");
-    if(InputCommand() == 1)
+    commandPlis = InputCommand();
+    if(CheckCurrentPlis(commandPlis, &currentPlis))
     {
         if (!WorkCycle())
         {
-            printf("\nERROR COMMAND\n");
+            printf("\nERROR WORK CYCLE\n");
             return;
         }
         if (!InitWorkWithFile())
         {
-            printf("\nERROR FILE\n");
+            printf("\nERROR WORK FILE\n");
             return;
         }
     }
+    else printf("ERROR COMMAND");
 
     // #4
     BREAK_LINE();
