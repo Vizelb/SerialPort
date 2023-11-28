@@ -44,17 +44,19 @@ typedef struct AnswerFromMk
 #define SIZE_PLIS_RUSSIAN           ((uint32_t) 0x12F57)
 #define SIZE_PLIS_CYCLONE           ((uint32_t) 0x59D8B)
 
-// main
-BOOL InitLoaderControl(HANDLE hComm, uint32_t currentPlis);
+//  main
+void InitLoaderControl();
+//
+BOOL StartLoadingFile(HANDLE hComm, uint32_t currentPlis);
 // #1 First function - KKU to init process
 BOOL StartConnection(HANDLE hComm, uint32_t currentPlis);
 void FormCommand(uint8_t *command, uint32_t currentPlis);
+// #2 Second function
+BOOL TransmitDataFile();
+BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *answerMk);
 
 BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis);
-
 BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint32_t currentPlis);
 
-// #2 Second function
-BOOL TransmitDataFile(HANDLE hComm);
 
 #endif // LOADER_CONTROL_H

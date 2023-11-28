@@ -25,24 +25,23 @@ int serial_port;
 // 2 variant
 #include <windows.h>
 
-#define BREAK_LINE()    printf("//////// ////////\n\n")
+//unsigned char bufrd[255];
+//unsigned char answerCommand[12];
 
-unsigned char bufrd[255];
-unsigned char answerCommand[12];
+#define BREAK_LINE()    printf("//////// ////////\n\n")
 
 HANDLE hComm;
 OVERLAPPED overlapped;
 
-const int READ_TIME_COMMAND = 100;
-const int READ_TIME_DATA = 500;
+
 OVERLAPPED sync = {0};
 int result = 0;
 unsigned long wait_s = 0;
 unsigned long read_s = 0;
 unsigned long state_s = 0;
 
-uint32_t currentPlis;
 uint32_t commandPlis;
+uint32_t currentPlis;
 
 void InitPortMenu()
 {
@@ -74,15 +73,9 @@ void InitPortMenu()
     commandPlis = InputCommand();
     if(CheckCurrentPlis(commandPlis, &currentPlis))
     {
-        //if (!WorkCycle())
-        if (!InitLoaderControl(hComm, currentPlis))
+        if (!StartLoadingFile(hComm, currentPlis))
         {
-            printf("\nERROR WORK CYCLE\n");
-            return;
-        }
-        if (!InitWorkWithFile())
-        {
-            printf("\nERROR WORK FILE\n");
+            printf("Che za error?");
             return;
         }
     }
@@ -162,7 +155,7 @@ BOOL config_com_port()
     if (GetCommState(hComm, &dcbSerialParams) == FALSE)
         return FALSE;
 
-    dcbSerialParams.BaudRate = CBR_115200; //CBR_19200;
+    dcbSerialParams.BaudRate = CBR_19200; //CBR_115200;
     dcbSerialParams.ByteSize = 8;
     dcbSerialParams.Parity = NOPARITY;
     dcbSerialParams.StopBits = ONESTOPBIT;
@@ -180,7 +173,7 @@ BOOL config_com_port()
 BOOL send_command(uint8_t *data)
 {
     int i;
-    DWORD dwBytesWritten = 14;
+    DWORD dwBytesWritten = 6;
     DWORD feedBack;
     //char msg[] = {c, '\0'};
     //uint8_t data[] = {c, '\0'};
@@ -206,7 +199,7 @@ BOOL send_command(uint8_t *data)
 }
 
 
-BOOL send_array(uint8_t *dataArray, uint16_t arraySize)
+BOOL send_data(uint8_t *dataArray, uint16_t arraySize)
 {
     int i;
     DWORD dwBytesWritten;
@@ -227,22 +220,6 @@ BOOL send_array(uint8_t *dataArray, uint16_t arraySize)
     //if (TransmitFile(hComm, ))
 }
 
-BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *answerMk)
-{
-
-    if(!send_array(dataArray, arraySize))
-    {
-        printf("\nError send array\n");
-        return FALSE;
-    }
-
-    if(!read_data_array_com_port(answerMk))
-    {
-        printf("Error read com port\n");
-        return FALSE;
-    }
-    return TRUE;
-}
 
 BOOL read_data_array_com_port(uint8_t *answerMk)
 {
@@ -252,7 +229,7 @@ BOOL read_data_array_com_port(uint8_t *answerMk)
     COMSTAT comstat;
 
     DWORD dwBytesRead = 0;          // кол-во прочитанных байтов
-    DWORD btr = 12;
+    DWORD btr = 14;
     DWORD temp, mask, signal;
     //overlapped.hEvent = CreateEvent (NULL, true, true, NULL);
 
@@ -322,9 +299,26 @@ BOOL read_command_com_port(uint8_t *data)
     return TRUE;
 }
 
+void CancelFunctiontIoEx()
+{
+    CancelIoEx(hComm, NULL);
+}
+
+void close_com_port()
+{
+    CloseHandle(hComm);
+}
 
 
-BOOL read_com_port()
+
+
+
+
+
+
+
+// Старая ф-ция, не используется
+/*BOOL read_com_port()
 {
     uint8_t chRet = '\0';
     int i = 0;
@@ -359,7 +353,7 @@ BOOL read_com_port()
         }
     }
     //CloseHandle(sync.hEvent);
-    return;
+    return;*/
 
 
     /*signal = WaitForSingleObject(overlapped.hEvent, INFINITE);
@@ -389,15 +383,11 @@ BOOL read_com_port()
         }
     return TRUE;
 */
-
-}
-
+//}
 
 
-void close_com_port()
-{
-    CloseHandle(hComm);
-}
+
+
 
 
 

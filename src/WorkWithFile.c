@@ -1,6 +1,6 @@
-
 #include "../inc/WorkWithFile.h"
 #include "../inc/PortMenu.h"
+#include "../inc/LoaderControl.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,8 +23,8 @@ char nameHEX[] = "D:/Danya/Libary/C/ComPortFilesForTest/1986BE91T_DEMO.HEX";
 //uint8_t buffer[192518];
 //uint8_t bufferPlis[77655];
 uint32_t counterPlis = 0;
-uint8_t bufferRead[512];
-uint8_t answerMk[12];
+uint8_t bufferRead[516];    // было 512
+uint8_t answerMk[14];       // было 12
 
 char c;
 int num;
@@ -100,7 +100,8 @@ BOOL ReadFromFile()
                 //bufferPlis[counterPlis] = bufferRead[i];
                 counterPlis++;
             }
-            TransmitPartOfProshivka(bufferRead, sizeof(bufferRead), answerMk);
+            if (!TransmitPartOfProshivka(bufferRead, sizeof(bufferRead), answerMk))
+                return FALSE;
             senderCounter++;
             printf("\nSumm of Transaction = %d, Current Addr = %x", senderCounter, counterPlis);
             printf("\nSumm File Bytes = %d, Skolko prochitali = %d ", summaryFileRead, sizeRead);
@@ -150,7 +151,8 @@ BOOL ReadFromFile()
                 //bufferPlis[counterPlis] = bufferRead[i];
                 counterPlis++;
             }
-            TransmitPartOfProshivka(bufferRead, sizeof(bufferRead), answerMk);
+            if (!TransmitPartOfProshivka(bufferRead, sizeof(bufferRead), answerMk))
+                return FALSE;
             senderCounter++;
             printf("\nSumm of Transaction = %d, Current Addr = %x", senderCounter, counterPlis);
             printf("\nSumm File Bytes = %d, Skolko prochitali = %d ", summaryFileRead, sizeRead);
@@ -200,7 +202,7 @@ void CloseFileForPort()
 
 
 
-int ascii_to_hex(char c)
+/*int ascii_to_hex(char c)
 {
     int num = (int) c;
     if (num < 58 && num > 47)
@@ -273,5 +275,5 @@ void StringParse()
     // 5 + size - ks
     // summ = 5 + size
 }
-
+*/
 

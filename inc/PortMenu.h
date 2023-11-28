@@ -6,6 +6,9 @@
 
 #include <windows.h>
 
+#define READ_TIME_COMMAND   ((int) 100)     // const int
+#define READ_TIME_DATA      ((int) 500)
+
 #define SERIAL_PORT         "COM4"
 #define BOAD_RATE           CBR_19200
 //#define BOAD_RATE           ((int) 19200)
@@ -31,14 +34,14 @@ BOOL WorkCycle();
 BOOL init_com_port();
 BOOL config_com_port();
 BOOL send_command(uint8_t *data);
-BOOL send_array(uint8_t *dataArray, uint16_t arraySize);
-BOOL read_com_port();
+BOOL send_data(uint8_t *dataArray, uint16_t arraySize);
+//BOOL read_com_port();                 // old
 void close_com_port();
 
-BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *answerMk);
+
 BOOL read_data_array_com_port(uint8_t *answerMk);
 BOOL read_command_com_port(uint8_t *data);
-
+void CancelFunctiontIoEx();
 
 
 
