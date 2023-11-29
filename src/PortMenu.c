@@ -155,7 +155,7 @@ BOOL config_com_port()
     if (GetCommState(hComm, &dcbSerialParams) == FALSE)
         return FALSE;
 
-    dcbSerialParams.BaudRate = CBR_19200; //CBR_115200;
+    dcbSerialParams.BaudRate = CBR_115200; //CBR_115200;
     dcbSerialParams.ByteSize = 8;
     dcbSerialParams.Parity = NOPARITY;
     dcbSerialParams.StopBits = ONESTOPBIT;
@@ -173,21 +173,20 @@ BOOL config_com_port()
 BOOL send_command(uint8_t *data)
 {
     int i;
-    DWORD dwBytesWritten = 6;
+    DWORD dwBytesWritten;
     DWORD feedBack;
     //char msg[] = {c, '\0'};
     //uint8_t data[] = {c, '\0'};
-    //uint8_t data[12];// = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,'\0'};
-    /*for (i = 0; i < sizeof(data); i++)
+    /*uint8_t data[14];// = {0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,'\0'};
+    for (i = 0; i < sizeof(data); i++)
     {
-        data[i] = 0xFF;     // открывать файл заранее; здесь передавать размер файла и адрес куда записывать
-    }
-    data[10] = 0x79;
-    data[11] = 0x75;*/
+        data[i] = command[i];     // открывать файл заранее; здесь передавать размер файла и адрес куда записывать
+    }*/
+
     //PurgeComm(hComm, PURGE_TXABORT | PURGE_TXCLEAR);
     if (WriteFile(hComm,            // дескриптор устр
                   data,              // указатель на буфер
-                  (DWORD)sizeof(data),      // длина буфера
+                  14,//(DWORD)sizeof(data),      // длина буфера
                   &dwBytesWritten,  // кол-во записанных байтов
                   NULL)             // overlapped атрибут
         || feedBack != (DWORD)sizeof(data)

@@ -89,7 +89,7 @@ void InitLoaderControl()
 
 BOOL StartLoadingFile(HANDLE hComm, uint32_t currentPlis)
 {
-    if (!StartConnection(hComm, currentPlis))
+    if (!TransmitCommandControl(hComm, currentPlis, K_K_UPR))
     {
         printf("\nERROR WORK CYCLE\n");
         return FALSE;
@@ -102,15 +102,21 @@ BOOL StartLoadingFile(HANDLE hComm, uint32_t currentPlis)
         return FALSE;
     }
 
+    /*if (!TransmitCommandControl(hComm, currentPlis, K_K_END))
+    {
+        printf("\nERROR WORK CYCLE\n");
+        return FALSE;
+    }*/
+
     return TRUE;
 }
 
-BOOL StartConnection(HANDLE hComm, uint32_t currentPlis)
+BOOL TransmitCommandControl(HANDLE hComm, uint32_t currentPlis, uint8_t codeCommand)
 {
     int i;
 
 
-    FormCommand(command, currentPlis);
+    FormCommand(command, currentPlis, codeCommand);
 
     printf("Prepare To Send Data Command\n");
     if(!send_command(command))
@@ -118,9 +124,9 @@ BOOL StartConnection(HANDLE hComm, uint32_t currentPlis)
         printf("Error send char Command 3\n");
         return FALSE;
     }
-    for (i = 0; i < 14; i++)
+    /*for (i = 0; i < 14; i++)
         printf("\ncommand[%d] =  %x", i, command[i]);
-    printf("\n");
+    printf("\n");*/
     printf("Command Send\n");
 
     CancelIoEx(hComm, NULL);
@@ -136,7 +142,7 @@ BOOL StartConnection(HANDLE hComm, uint32_t currentPlis)
     CancelIoEx(hComm, NULL);
     //CancelFunctiontIoEx();
 
-    if(!CheckAnswerCommand(commandAnswer, currentPlis))
+    if(!CheckAnswerCommand(commandAnswer, currentPlis, K_KVIT))
     {
         printf("Error Control Command\n");
         return FALSE;
@@ -151,13 +157,13 @@ BOOL TransmitDataFile()
     return TRUE;
 }
 
-void FormCommand(uint8_t *command, uint32_t currentPlis)
+void FormCommand(uint8_t *command, uint32_t currentPlis, uint8_t codeCommand)
 {
     int i;
     uint32_t crc32;
     struct CommandToMk headCommand;
 
-    headCommand.command.bytes.code = K_K_UPR;
+    headCommand.command.bytes.code = codeCommand;
     headCommand.command.bytes.plisNumber = currentPlis;
 
     if (currentPlis != PLIS_CYCLONE)
@@ -172,7 +178,7 @@ void FormCommand(uint8_t *command, uint32_t currentPlis)
     }
 
     for (i = 0; i < 4; i++)
-        headCommand.command.bytes.addrDk[i] = 0x55;//addrFilePlisInDk >> (i*8);
+        headCommand.command.bytes.addrDk[i] = addrFilePlisInDk >> (i*8);
 
     crc32 = CRC32(headCommand, 10);
     for (i = 0; i < 4; i++)
@@ -220,7 +226,7 @@ BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis)
     return FALSE;
 }
 
-BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint32_t currentPlis)
+BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint32_t currentPlis, uint8_t codeCommand)
 {
     int i;
     uint32_t crc32;
@@ -229,15 +235,20 @@ BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint32_t currentPlis)
     for (i = 0; i < 14; i++)
         headAnswer.answer.value[i] = commandAnswer[i];
 
-    if (headAnswer.answer.bytes.code != K_KVIT)
+    if (headAnswer.answer.bytes.code != codeCommand)
         return FALSE;
     if (headAnswer.answer.bytes.plisNumber != currentPlis)
         return FALSE;
-    if (headAnswer.answer.bytes.emptyBytes != 0x00)
-        return FALSE;
+    for (i = 0; i < 8; i++)
+        if (headAnswer.answer.bytes.emptyBytes[i] != 0x00){
+            printf("error 3");
+            return FALSE;
+        }
     crc32 = CRC32(headAnswer.answer.value, 10);
-    if(!CheckCRC32(crc32, headAnswer.answer.bytes.Crc32))
+    if(!CheckCRC32(crc32, headAnswer.answer.bytes.Crc32)){
+        printf("error 4");
         return FALSE;
+    }
 
     return TRUE;
 }
@@ -245,14 +256,23 @@ BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint32_t currentPlis)
 
 BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *answerMk)
 {
+    int i;
     uint32_t crc32;
 
+    if (arraySize != 512)
+        for (i = 0; i < 512; i++)
+            dataArray[arraySize] = 0x00;
+
     crc32 = CRC32(dataArray, 512);
-    dataArray[512] = crc32;
-    dataArray[513] = crc32;
-    dataArray[514] = crc32;
-    dataArray[515] = crc32;
-    if(!send_data(dataArray, arraySize))
+    for (i = 0; i < 4; i++)
+        dataArray[512 + i] = crc32 >> (i*8);
+
+
+    /*for (i = 0; i < 516; i++)
+        printf("\ncommand[%d] =  %x", i, dataArray[i]);
+    printf("\n");*/
+
+    if(!send_data(dataArray, 516))
     {
         printf("\nError send array\n");
         return FALSE;
@@ -263,8 +283,11 @@ BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *an
         printf("Error read com port\n");
         return FALSE;
     }
-    if (!CheckAnswerCommand(answerMk, currentPlisAnswer))
+    if (!CheckAnswerCommand(answerMk, currentPlisAnswer, K_R_D))
+    {
+        printf("Error read com port DATA - check bytes\n");
         return FALSE;
+    }
 
     return TRUE;
 }

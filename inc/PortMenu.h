@@ -33,7 +33,7 @@ void ConfigurateSerialPort();
 BOOL WorkCycle();
 BOOL init_com_port();
 BOOL config_com_port();
-BOOL send_command(uint8_t *data);
+BOOL send_command(uint8_t *command);
 BOOL send_data(uint8_t *dataArray, uint16_t arraySize);
 //BOOL read_com_port();                 // old
 void close_com_port();

@@ -84,6 +84,9 @@ BOOL ReadFromFile()
     numberFullCycle = kolvoByte / 65535;
     numberOstatok = kolvoByte - (numberFullCycle * 65535) ;
 
+     printf("\nKolvo Byte = %d", kolvoByte);
+     printf("\nNumber Full Cycle = %d", numberFullCycle);
+     printf("\nNumber Ostatok = %d", numberOstatok);
 
     //while (!feof(file))
     for(j = 0; j < numberFullCycle; j++)
@@ -115,11 +118,6 @@ BOOL ReadFromFile()
             //printf("\nTRUE\n");
 
         //printf("\n%d\n", sizeRead);
-            if(answerMk[0] != 0xAA && answerMk[10] != 0x79 && answerMk[11] != 0x75)
-            {
-                printf("ERROR TRANSACTION");
-                return FALSE;
-            }
             if(sizeRead < 512)
             {
                 printf("\n ERROR End of Reading");
@@ -147,27 +145,24 @@ BOOL ReadFromFile()
             summaryFileRead += sizeRead;
             for(i = 0; i < sizeof(bufferRead); i++)
             {
-                //printf("%x ", bufferRead[i]);   // d - print in hex
+                printf("%x ", bufferRead[i]);   // d - print in hex
                 //bufferPlis[counterPlis] = bufferRead[i];
                 counterPlis++;
             }
-            if (!TransmitPartOfProshivka(bufferRead, sizeof(bufferRead), answerMk))
+            if (!TransmitPartOfProshivka(bufferRead, sizeRead, answerMk))
                 return FALSE;
             senderCounter++;
+            printf("\nNumber Ostatok = %d", numberOstatok);
+            printf("\nSize of posilka = %d, and i = %d", sizeof(bufferRead), i);
             printf("\nSumm of Transaction = %d, Current Addr = %x", senderCounter, counterPlis);
             printf("\nSumm File Bytes = %d, Skolko prochitali = %d ", summaryFileRead, sizeRead);
             printf("\nFile Size = %d, delitel = %d", GetFileSizeMy(), GetFileSizeMy() / 65535);
             printf("\nFile Size = , delitel/j = %d",  j);
 
-            if(answerMk[0] != 0xAA && answerMk[10] != 0x79 && answerMk[11] != 0x75)
-            {
-                printf("ERROR TRANSACTION");
-                return FALSE;
-            }
             if(sizeRead < 512)
             {
-                printf("\n ERROR End of Reading");
-                return FALSE;
+                printf("\n End of Reading tyta chtoli?");
+                break;
             }
         }
     }
