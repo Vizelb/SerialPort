@@ -204,9 +204,10 @@ BOOL send_data(uint8_t *dataArray, uint16_t arraySize)
     DWORD dwBytesWritten;
     DWORD feedBack;
 
+
     if (WriteFile(hComm,            // дескриптор устр
                   dataArray,              // указатель на буфер
-                  arraySize,//(DWORD)sizeof(dataArray),      // длина буфера
+                  516,//arraySize,//(DWORD)sizeof(dataArray),      // длина буфера
                   &dwBytesWritten,  // кол-во записанных байтов
                   NULL)             // overlapped атрибут
         || feedBack != (DWORD)sizeof(dataArray)

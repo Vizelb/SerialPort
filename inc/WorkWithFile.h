@@ -6,8 +6,8 @@
 #include <windows.h>
 
 
-BOOL InitWorkWithFile();
-BOOL OpenFileForPort();
+BOOL InitWorkWithFile(uint32_t currentPlis);
+BOOL OpenFileForPort(uint32_t currentPlis);
 BOOL ReadFromFile();
 
 uint32_t GetFileSizeMy();

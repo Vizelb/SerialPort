@@ -19,14 +19,18 @@
 #include <stdbool.h>*/
 
 #define BREAK_LINE()    printf("//////// ////////\n\n")
+extern HANDLE hComm;
 
 uint32_t currentPlisAnswer = 0;
 
 uint32_t sizeFilePlis;
 uint32_t addrFilePlisInDk;
+//uint32_t sizeFilePlisInDk;
 
 uint8_t command[14];
 uint8_t commandAnswer[14];
+
+int switcherPlis = 0;
 
 void InitLoaderControl()
 {
@@ -60,20 +64,11 @@ void InitLoaderControl()
     commandPlis = InputCommand();
     if(CheckCurrentPlis(commandPlis, &currentPlis))
     {
-        //if (!StartLoadingFile(/*hComm,*/ currentPlis))
-            return;
-        //if (!WorkCycle())
-        /*if (!InitLoaderControl(hComm, currentPlis))
+        if (!StartLoadingFile(hComm, currentPlis))
         {
-            printf("\nERROR WORK CYCLE\n");
+            printf("Che za error?");
             return;
         }
-        //if (!InitWorkWithFile())
-        if (!TransmitDataFile(hComm))
-        {
-            printf("\nERROR WORK FILE\n");
-            return;
-        }*/
     }
     else printf("ERROR COMMAND");
 
@@ -96,7 +91,7 @@ BOOL StartLoadingFile(HANDLE hComm, uint32_t currentPlis)
     }
 
     currentPlisAnswer = currentPlis;    // Ïëîõîé Êîñòûëü
-    if (!TransmitDataFile())
+    if (!TransmitDataFile(currentPlis))
     {
         printf("\nERROR WORK FILE\n");
         return FALSE;
@@ -150,10 +145,31 @@ BOOL TransmitCommandControl(HANDLE hComm, uint32_t currentPlis, uint8_t codeComm
     return TRUE;
 }
 
-BOOL TransmitDataFile()
+BOOL TransmitDataFile(uint32_t currentPlis)
 {
-    if (!InitWorkWithFile())
+    if (currentPlis == ALL_SET1)
+    {
+        while (switcherPlis != 3)
+        {
+            //printf("First cyrcle error - out");
+            if (!InitWorkWithFile(currentPlis))
+            {
+                printf("First cyrcle error");
+                return FALSE;
+            }
+        }
+    }
+    else if (currentPlis == ALL_SET2)
+    {
+        while (switcherPlis != 4)
+        {
+            if (!InitWorkWithFile(currentPlis))
+                return FALSE;
+        }
+    }
+    else if (!InitWorkWithFile(currentPlis))
         return FALSE;
+
     return TRUE;
 }
 
@@ -166,16 +182,8 @@ void FormCommand(uint8_t *command, uint32_t currentPlis, uint8_t codeCommand)
     headCommand.command.bytes.code = codeCommand;
     headCommand.command.bytes.plisNumber = currentPlis;
 
-    if (currentPlis != PLIS_CYCLONE)
-    {
-        for (i = 0; i < 4; i++)
-            headCommand.command.bytes.sizeFile[i] = SIZE_PLIS_RUSSIAN >> (i*8);
-    }
-    else
-    {
-        for (i = 0; i < 4; i++)
-            headCommand.command.bytes.sizeFile[i] = SIZE_PLIS_CYCLONE >> (i*8);
-    }
+    for (i = 0; i < 4; i++)
+        headCommand.command.bytes.sizeFile[i] = sizeFilePlis >> (i*8);
 
     for (i = 0; i < 4; i++)
         headCommand.command.bytes.addrDk[i] = addrFilePlisInDk >> (i*8);
@@ -194,6 +202,7 @@ BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis)
     {
         *currentPlis = PLIS1;
         addrFilePlisInDk = 0;
+        sizeFilePlis = SIZE_PLIS_RUSSIAN;
         //printf("\ncurrent PLIS = %d\n", *currentPlis);
         return TRUE;
     }
@@ -201,6 +210,7 @@ BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis)
     {
         *currentPlis = PLIS2;
         addrFilePlisInDk = SIZE_PLIS_RUSSIAN;
+        sizeFilePlis = SIZE_PLIS_RUSSIAN;
         //printf("current PLIS = %d", *currentPlis);
         return TRUE;
     }
@@ -208,20 +218,39 @@ BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis)
     {
         *currentPlis = PLIS_CYCLONE;
         addrFilePlisInDk = SIZE_PLIS_RUSSIAN * 2;
+        sizeFilePlis = SIZE_PLIS_CYCLONE;
         return TRUE;
     }
     if (command == 4)
     {
         *currentPlis = PLIS3;
-        addrFilePlisInDk = 0;
+        addrFilePlisInDk = SIZE_PLIS_RUSSIAN * 2;
+        sizeFilePlis = SIZE_PLIS_RUSSIAN;
         return TRUE;
     }
     if (command == 5)
     {
         *currentPlis = PLIS4;
-        addrFilePlisInDk = SIZE_PLIS_RUSSIAN;
+        addrFilePlisInDk = SIZE_PLIS_RUSSIAN * 2 + SIZE_PLIS_RUSSIAN;
+        sizeFilePlis = SIZE_PLIS_RUSSIAN;
         return TRUE;
     }
+
+    if (command == 6)   // ÄËß ÂÑÅÕ ÂÎÇÌÎÆÍÛÕ ÏËÈÑ ÄËß ÄÊ
+    {
+        *currentPlis = ALL_SET1;
+        addrFilePlisInDk = 0;
+        sizeFilePlis = SIZE_PLIS_RUSSIAN;
+        return TRUE;
+    }
+    if (command == 7)   // ÄËß ÂÑÅÕ ÂÎÇÌÎÆÍÛÕ ÏËÈÑ ÄËß ÄÊ
+    {
+        *currentPlis = ALL_SET2;
+        addrFilePlisInDk = 0;
+        sizeFilePlis = SIZE_PLIS_RUSSIAN;
+        return TRUE;
+    }
+
     printf("error current PLIS");
     return FALSE;
 }
@@ -258,11 +287,20 @@ BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *an
 {
     int i;
     uint32_t crc32;
+    uint16_t sizeToTransmit = arraySize;
 
     if (arraySize != 512)
-        for (i = 0; i < 512; i++)
-            dataArray[arraySize] = 0x00;
+    {
+        for (i = arraySize; i < 512; i++)
+            dataArray[i] = 0x00;
+    }
 
+    /*for (i = 0; i < 516; i++)
+        printf("\ncommand[%d] =  %x", i, dataArray[i]);
+    printf("\n");*/
+
+    printf("\nArray Size = %d", arraySize);
+    printf("\nArray Size = %d", sizeToTransmit);
     crc32 = CRC32(dataArray, 512);
     for (i = 0; i < 4; i++)
         dataArray[512 + i] = crc32 >> (i*8);
@@ -272,23 +310,24 @@ BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *an
         printf("\ncommand[%d] =  %x", i, dataArray[i]);
     printf("\n");*/
 
-    if(!send_data(dataArray, 516))
+    if(!send_data(dataArray, sizeToTransmit + 4))
     {
         printf("\nError send array\n");
         return FALSE;
     }
-
+    printf("\n  1  No ERROR send array\n");
     if(!read_data_array_com_port(answerMk))
     {
         printf("Error read com port\n");
         return FALSE;
     }
+    printf("\n  2  No ERROR send array\n");
     if (!CheckAnswerCommand(answerMk, currentPlisAnswer, K_R_D))
     {
         printf("Error read com port DATA - check bytes\n");
         return FALSE;
     }
-
+    printf("\n 3  No ERROR send array\n");
     return TRUE;
 }
 

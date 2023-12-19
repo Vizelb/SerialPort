@@ -11,17 +11,13 @@
 
 
 FILE *file;
-char nameTxt[] = "test3.txt";
-char nameTestHex[] = "D:/Danya/Libary/C/test1.HEX";
-char proshivkaMk[] = "D:/Danya/Libary/C/generateFile";
-char imitPlis[] = "D:/Danya/Libary/C/imitPlis";
-char proshivkaPlis[] = "D:/Danya/Libary/C/test4.rbf";
-char testNewFile[] = "D:/Danya/Libary/C/testNewFile.txt";
-char nameHEX[] = "D:/Danya/Libary/C/ComPortFilesForTest/1986BE91T_DEMO.HEX";
-//uint32_t buffer[128];
 
-//uint8_t buffer[192518];
-//uint8_t bufferPlis[77655];
+char proshivkaPlis1[] = "D:/Danya/Libary/C/DD13_TEST.rbf";
+char proshivkaPlis2[] = "D:/Danya/Libary/C/DD14_TEST.rbf";
+char proshivkaPlisCyclone[] = "D:/Danya/Libary/C/TEST_rekurrenta_Cyclone_4.rbf";
+char proshivkaPlis3[] = "D:/Danya/Libary/C/MM937_TEST_DD1_2.rbf";
+char proshivkaPlis4[] = "D:/Danya/Libary/C/MM937_TEST_DD1_2.rbf";
+
 uint32_t counterPlis = 0;
 uint8_t bufferRead[516];    // было 512
 uint8_t answerMk[14];       // было 12
@@ -29,14 +25,16 @@ uint8_t answerMk[14];       // было 12
 char c;
 int num;
 
+extern switcherPlis;
+
 //fopen(D:\Danya\Libary\C\test1, "r");  // открыть файл (имя, на чтение)
 //fopen(D:/Danya/Libary/C/test1, "r");  // открыть файл (имя, на чтение)
 
-BOOL InitWorkWithFile()
+BOOL InitWorkWithFile(uint32_t currentPlis)
 {
     int i;
 
-    if (!OpenFileForPort())
+    if (!OpenFileForPort(currentPlis))
         return FALSE;
 
     if(!ReadFromFile())
@@ -72,6 +70,7 @@ BOOL ReadFromFile()
 
     uint32_t senderCounter = 0;
     uint32_t summaryFileRead = 0;
+    uint32_t summaryFileTransmit = 0;
     //char bufferTem[256];
     //char buf = 0;
     uint32_t kolvoByte = 0;
@@ -84,7 +83,7 @@ BOOL ReadFromFile()
     numberFullCycle = kolvoByte / 65535;
     numberOstatok = kolvoByte - (numberFullCycle * 65535) ;
 
-     printf("\nKolvo Byte = %d", kolvoByte);
+     printf("\n\nKolvo Byte = %d", kolvoByte);
      printf("\nNumber Full Cycle = %d", numberFullCycle);
      printf("\nNumber Ostatok = %d", numberOstatok);
 
@@ -94,7 +93,7 @@ BOOL ReadFromFile()
         summaryFileRead = 0;
         while(summaryFileRead < 65536)
         {
-            cheZaNumber= fseek(file, j*65536+summaryFileRead, SEEK_SET);
+            cheZaNumber = fseek(file, j*65536 + summaryFileRead, SEEK_SET);
             sizeRead = fread(&bufferRead, sizeof(uint8_t), 512, file);
             summaryFileRead += sizeRead;
             for(i = 0; i < sizeof(bufferRead); i++)
@@ -103,11 +102,15 @@ BOOL ReadFromFile()
                 //bufferPlis[counterPlis] = bufferRead[i];
                 counterPlis++;
             }
-            if (!TransmitPartOfProshivka(bufferRead, sizeof(bufferRead), answerMk))
+            if (!TransmitPartOfProshivka(bufferRead, sizeRead/*sizeof(bufferRead)*/, answerMk))
                 return FALSE;
+
             senderCounter++;
+            summaryFileTransmit += sizeof(bufferRead);
+
+            printf("\nSize of posilka = %d, and Summary File Transmit = %d", sizeof(bufferRead), summaryFileTransmit);
             printf("\nSumm of Transaction = %d, Current Addr = %x", senderCounter, counterPlis);
-            printf("\nSumm File Bytes = %d, Skolko prochitali = %d ", summaryFileRead, sizeRead);
+            printf("\nSumm File Bytes = %d, Skolko prochitali = %d , Addr Current Read = %x", summaryFileRead, sizeRead, summaryFileRead);
             printf("\nFile Size = , delitel/j = %d",  j);
             if(counterPlis == 0xFFFF)
             {
@@ -133,27 +136,44 @@ BOOL ReadFromFile()
 
     if (numberOstatok != 0)
     {
-        printf("\n ZASHLI v obrabotchik\n");
+        printf("\n\n\n ZASHLI v obrabotchik\n");
         printf("\nFile Size = , delitel/j = %d\n",  j);
         summaryFileRead = 0;
 
-        while(summaryFileRead < numberOstatok)//!feof(file))
+        while(summaryFileRead < numberOstatok)  // !feof(file))
         {
-            cheZaNumber= fseek(file, j*65536+summaryFileRead, SEEK_SET);
+            cheZaNumber = fseek(file, j*65536 + summaryFileRead, SEEK_SET);
             printf("\n Number-shmumber = %d\n", cheZaNumber);
             sizeRead = fread(&bufferRead, sizeof(uint8_t), 512, file);
             summaryFileRead += sizeRead;
             for(i = 0; i < sizeof(bufferRead); i++)
             {
-                printf("%x ", bufferRead[i]);   // d - print in hex
+                //printf("%x ", bufferRead[i]);   // d - print in hex
                 //bufferPlis[counterPlis] = bufferRead[i];
                 counterPlis++;
             }
+            if (sizeRead != 512)
+            {
+                printf("\nSkolko prochitali = %d ", sizeRead);
+                for(i = 0; i < sizeof(bufferRead); i++)
+                    printf("%x ", bufferRead[i]);   // d - print in hex
+            }
             if (!TransmitPartOfProshivka(bufferRead, sizeRead, answerMk))
+            {
+                printf("ERROR OSTATOK FILE!!");
                 return FALSE;
+            }
+            if (sizeRead != 512)
+            {
+                for(i = 0; i < sizeof(bufferRead); i++)
+                    printf("%x ", bufferRead[i]);   // d - print in hex
+            }
+
+
             senderCounter++;
+            summaryFileTransmit += sizeof(bufferRead);
             printf("\nNumber Ostatok = %d", numberOstatok);
-            printf("\nSize of posilka = %d, and i = %d", sizeof(bufferRead), i);
+            printf("\nSize of posilka = %d, and Summary File Transmit = %d", sizeof(bufferRead), summaryFileTransmit);
             printf("\nSumm of Transaction = %d, Current Addr = %x", senderCounter, counterPlis);
             printf("\nSumm File Bytes = %d, Skolko prochitali = %d ", summaryFileRead, sizeRead);
             printf("\nFile Size = %d, delitel = %d", GetFileSizeMy(), GetFileSizeMy() / 65535);
@@ -171,16 +191,75 @@ BOOL ReadFromFile()
     return TRUE;
 }
 
-BOOL OpenFileForPort()
+BOOL OpenFileForPort(uint32_t currentPlis)
 {
     int sizefiletowrite;
     //int fileSize;
     //file = fopen("D:/Danya/Libary/C/test1.txt", "r");
-    //file = fopen(proshivkaMk, "rb");
-    //file = fopen(imitPlis, "rb");
-    file = fopen(proshivkaPlis, "rb");
-    //file = fopen(testNewFile, "rb");
-    //file = fopen(nameTxt, "rb");
+    //file = fopen(proshivkaPlis1, "rb");
+
+
+    if (currentPlis == PLIS1)
+        file = fopen(proshivkaPlis1, "rb");
+    else if (currentPlis == PLIS2)
+        file = fopen(proshivkaPlis2, "rb");
+    else if (currentPlis == PLIS_CYCLONE)
+        file = fopen(proshivkaPlisCyclone, "rb");
+    else if (currentPlis == PLIS3)
+        file = fopen(proshivkaPlis3, "rb");
+    else if (currentPlis == PLIS4)
+        file = fopen(proshivkaPlis4, "rb");
+
+    else if (currentPlis == ALL_SET1)
+    {
+        printf("\nSwitcher Plis = %d\n", switcherPlis);
+        if (switcherPlis == 0)
+        {
+            file = fopen(proshivkaPlis1, "rb");
+            switcherPlis = 1;
+            return TRUE;
+        }
+        if (switcherPlis == 1)
+        {
+            file = fopen(proshivkaPlis2, "rb");
+            switcherPlis = 2;
+            return TRUE;
+        }
+        if (switcherPlis == 2)
+        {
+            file = fopen(proshivkaPlisCyclone, "rb");
+            switcherPlis = 3;
+            return TRUE;
+        }
+    }
+
+    else if (currentPlis == ALL_SET2)
+    {
+        if (switcherPlis == 0)
+        {
+            file = fopen(proshivkaPlis1, "rb");
+            switcherPlis = 1;
+            return TRUE;
+        }
+        if (switcherPlis == 1)
+        {
+            file = fopen(proshivkaPlis2, "rb");
+            switcherPlis = 2;
+            return TRUE;
+        }
+        if (switcherPlis == 2)
+        {
+            file = fopen(proshivkaPlis3, "rb");
+            switcherPlis = 3;
+            return TRUE;
+        }
+        if (switcherPlis == 3)
+        {
+            file = fopen(proshivkaPlis3, "rb");
+            switcherPlis = 4;
+            return TRUE;
+        }
+    }
 
     if (file == NULL)
     {

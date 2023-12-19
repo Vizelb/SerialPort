@@ -27,7 +27,7 @@ int main()
     //InitLoaderControl();    // Main Work Function
 
     InitPortMenu();         // Main Work Function
-
+    //InitLoaderControl();
     //InitConsoleControl();
 
     //InitWorkWithFile();

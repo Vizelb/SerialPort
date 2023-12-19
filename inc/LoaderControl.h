@@ -54,7 +54,7 @@ BOOL StartLoadingFile(HANDLE hComm, uint32_t currentPlis);
 BOOL TransmitCommandControl(HANDLE hComm, uint32_t currentPlis, uint8_t codeCommand);
 void FormCommand(uint8_t *command, uint32_t currentPlis, uint8_t codeCommand);
 // #2 Second function
-BOOL TransmitDataFile();
+BOOL TransmitDataFile(uint32_t currentPlis);
 BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *answerMk);
 
 BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis);

@@ -20,6 +20,9 @@
 #define PLIS3               ((uint32_t) 0x90)
 #define PLIS4               ((uint32_t) 0xA0)
 
+#define ALL_SET1            ((uint32_t) 0xB0)
+#define ALL_SET2            ((uint32_t) 0xC0)
+
 // Methods
 void InitPortMenu();
 
