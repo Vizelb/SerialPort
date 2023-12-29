@@ -9,7 +9,9 @@
 
 int main()
 {
-    int i = 0;
+    int i = 1;
+
+
 /*    uint8_t mass[4] = {0};
     uint32_t test = 0xFFAABBCC;
 
@@ -24,9 +26,10 @@ int main()
     printf("\n check[2] = %x\n", mass[2]);
     printf("\n check[3] = %x\n", mass[3]);
 */
-    //InitLoaderControl();    // Main Work Function
+    //InitLoaderControl();    // Main Work Function (not working)
 
     InitPortMenu();         // Main Work Function
+
     //InitLoaderControl();
     //InitConsoleControl();
 

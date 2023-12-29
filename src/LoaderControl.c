@@ -18,6 +18,11 @@
 
 #include <stdbool.h>*/
 
+uint8_t rpzuNumber;
+uint8_t plisNumber;
+uint8_t plisType;
+uint8_t rpzuFileNumber;
+
 #define BREAK_LINE()    printf("//////// ////////\n\n")
 extern HANDLE hComm;
 
@@ -90,7 +95,7 @@ BOOL StartLoadingFile(HANDLE hComm, uint32_t currentPlis)
         return FALSE;
     }
 
-    currentPlisAnswer = currentPlis;    // œÎÓıÓÈ  ÓÒÚ˚Î¸
+    currentPlisAnswer = currentPlis;    // √è√´√Æ√µ√Æ√© √ä√Æ√±√≤√ª√´√º
     if (!TransmitDataFile(currentPlis))
     {
         printf("\nERROR WORK FILE\n");
@@ -110,8 +115,9 @@ BOOL TransmitCommandControl(HANDLE hComm, uint32_t currentPlis, uint8_t codeComm
 {
     int i;
 
-
     FormCommand(command, currentPlis, codeCommand);
+
+    //else FormCommandDu(command, currentPlis, codeCommand);
 
     printf("Prepare To Send Data Command\n");
     if(!send_command(command))
@@ -196,6 +202,31 @@ void FormCommand(uint8_t *command, uint32_t currentPlis, uint8_t codeCommand)
         command[i] = headCommand.command.value[i];
 }
 
+void FormCommandDu(uint8_t *command, uint32_t currentPlis, uint8_t codeCommand)
+{
+    int i;
+    uint32_t crc32;
+    struct CommandDu duCommand;
+
+    duCommand.command.bytes.code = codeCommand;
+    duCommand.command.bytes.sec_byte = 0x00;    //sbp;      currentPlis;
+
+    duCommand.command.bytes.third_byte.bits.NumRPZU = rpzuNumber;
+    duCommand.command.bytes.third_byte.bits.EMPTY = 0x00;
+
+    duCommand.command.bytes.four_byte.bits.NumPLIS = plisNumber;
+    duCommand.command.bytes.four_byte.bits.TypePLIS = plisType;
+    duCommand.command.bytes.four_byte.bits.NumFileRPZU = rpzuFileNumber;
+
+
+    crc32 = CRC32(duCommand, 10);
+    for (i = 0; i < 4; i++)
+        duCommand.command.bytes.Crc32[i] = crc32 >> (i*8);
+
+    for (i = 0; i < 14; i++)
+        command[i] = duCommand.command.value[i];
+}
+
 BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis)
 {
     if (command == 1)
@@ -204,6 +235,8 @@ BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis)
         addrFilePlisInDk = 0;
         sizeFilePlis = SIZE_PLIS_RUSSIAN;
         //printf("\ncurrent PLIS = %d\n", *currentPlis);
+
+
         return TRUE;
     }
     if (command == 2)
@@ -236,14 +269,14 @@ BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis)
         return TRUE;
     }
 
-    if (command == 6)   // ƒÀﬂ ¬—≈’ ¬Œ«ÃŒ∆Õ€’ œÀ»— ƒÀﬂ ƒ 
+    if (command == 6)   // √Ñ√ã√ü √Ç√ë√Ö√ï √Ç√é√á√å√é√Ü√ç√õ√ï √è√ã√à√ë √Ñ√ã√ü √Ñ√ä
     {
         *currentPlis = ALL_SET1;
         addrFilePlisInDk = 0;
         sizeFilePlis = SIZE_PLIS_RUSSIAN;
         return TRUE;
     }
-    if (command == 7)   // ƒÀﬂ ¬—≈’ ¬Œ«ÃŒ∆Õ€’ œÀ»— ƒÀﬂ ƒ 
+    if (command == 7)   // √Ñ√ã√ü √Ç√ë√Ö√ï √Ç√é√á√å√é√Ü√ç√õ√ï √è√ã√à√ë √Ñ√ã√ü √Ñ√ä
     {
         *currentPlis = ALL_SET2;
         addrFilePlisInDk = 0;

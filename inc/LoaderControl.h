@@ -22,6 +22,49 @@ typedef struct CommandToMk
     union FormCommandToMk command;
 };
 
+
+struct ThirdBitsCommandDu{
+    uint8_t
+        NumRPZU:4,
+        EMPTY:4;
+};
+union ThirdByteCommandDu{
+    uint8_t value;
+    struct ThirdBitsCommandDu bits;
+};
+
+struct FourthBitsCommandDu{
+    uint8_t
+        NumPLIS:2,
+        TypePLIS:2,
+        NumFileRPZU:4;
+};
+union FourthByteCommandDu{
+    uint8_t value;
+    struct FourthBitsCommandDu bits;
+};
+
+union FormCommandDu
+{
+    uint8_t value[14];
+    struct
+    {
+        uint8_t code;
+        uint8_t sec_byte;
+        union ThirdByteCommandDu third_byte;
+        union FourthByteCommandDu four_byte;
+        uint8_t emptyBytes[6];
+        uint8_t Crc32[4];
+    } bytes;
+};
+typedef struct CommandDu
+{
+    union FormCommandDu command;
+};
+
+
+
+
 union AnalysisAnswerFromMk
 {
     uint8_t value[14];
@@ -53,6 +96,7 @@ BOOL StartLoadingFile(HANDLE hComm, uint32_t currentPlis);
 // #1 First function - KKU to init process
 BOOL TransmitCommandControl(HANDLE hComm, uint32_t currentPlis, uint8_t codeCommand);
 void FormCommand(uint8_t *command, uint32_t currentPlis, uint8_t codeCommand);
+void FormCommandDu(uint8_t *command, uint32_t currentPlis, uint8_t codeCommand);    // Update
 // #2 Second function
 BOOL TransmitDataFile(uint32_t currentPlis);
 BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *answerMk);
