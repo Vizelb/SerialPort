@@ -141,7 +141,7 @@ BOOL init_com_port()
     //hComm = CreateFile(/*SERIAL_PORT*/"COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
     if (hComm == INVALID_HANDLE_VALUE)
     {
-        printf("Error Error opening serial port\n");
+        printf("Error opening serial port\n");
         return FALSE;
     }
     printf("Port is open\n");
@@ -162,8 +162,12 @@ BOOL config_com_port()
     //dcbSerialParams.StopBits = TWOSTOPBITS;
 
     if (SetCommState(hComm, &dcbSerialParams) == FALSE)
+    {
+        printf("Error configurate port\n");
         return FALSE;
+    }
 
+    printf("Successfully configurate port\n");
     return TRUE;
 }
 
@@ -203,19 +207,23 @@ BOOL send_data(uint8_t *dataArray, uint16_t arraySize)
     int i;
     DWORD dwBytesWritten;
     DWORD feedBack;
-
+    printf("Start Send data\n");
 
     if (WriteFile(hComm,            // дескриптор устр
                   dataArray,              // указатель на буфер
-                  516,//arraySize,//(DWORD)sizeof(dataArray),      // длина буфера
+                  arraySize,//arraySize,//(DWORD)sizeof(dataArray),      // длина буфера
                   &dwBytesWritten,  // кол-во записанных байтов
                   NULL)             // overlapped атрибут
         || feedBack != (DWORD)sizeof(dataArray)
         )
         {
+            printf("End Send data\n");
         return TRUE;
         }
-    else return FALSE;
+    else{
+        printf("Error Send data\n");
+        return FALSE;
+    }
     //if (WriteFile())
     //if (TransmitFile(hComm, ))
 }

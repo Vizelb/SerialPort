@@ -1,6 +1,7 @@
 #include "../inc/LoaderControl.h"
 #include "../inc/PortMenu.h"
 #include "../inc/WorkWithFile.h"
+#include "../inc/ConsoleControl.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -363,5 +364,257 @@ BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *an
     printf("\n 3  No ERROR send array\n");
     return TRUE;
 }
+
+
+
+
+void newMainFunc(void)
+{
+    int i;
+    uint8_t consoleCommand = 0;
+    int consoleCommand2;
+    uint8_t data[14];
+
+    for (i = 0; i < 14; i++)
+        data[i] = 0x55;
+
+    printf("START\n");
+    //printf(" \n");
+
+    printf("Try to open port\n");
+    if(!init_com_port())
+        return;
+
+    printf("Try to configurate port\n");
+    if(!config_com_port())
+        return;
+
+    // WORK:
+/*do{
+
+        //CancelIoEx(hComm, NULL);
+    } while (consoleCommand == 2);*/
+    while(1)
+    {
+        consoleCommand2 = testCommand();
+        if (consoleCommand == 1)
+        {
+            //consoleCommand = 0;
+            printf("Send 0xAA\n");
+            for (i = 0; i < 14; i++)
+                data[i] = 0xAA;
+        }
+        if (consoleCommand == 2)
+        {
+            consoleCommand = 0;
+            printf("Send 0x55\n");
+            for (i = 0; i < 14; i++)
+                data[i] = 0x55;
+        }
+        printf("Prepare Send data\n");
+        /*if (testCommand() == 2)
+            printf("WOWWWW\n");*/
+        //else if ()
+        if(!send_data(data, 14))
+        {
+            printf("\nError send array\n");
+            return FALSE;
+        }
+        consoleCommand++;
+
+    }
+
+
+    printf("Prepare To Close Port\n");
+    close_com_port();
+    printf("Successfully Closed Port!\n");
+
+    printf("END\n");
+}
+
+void CheckCommandControl(int consoleCommand)
+{
+    uint8_t currentBlock;
+    uint32_t currentCommand;
+
+    if ((consoleCommand >> 8) == 1)         // 16-31
+        currentBlock = 1;
+    else if ((consoleCommand >> 8) == 2)    // 32-47
+        currentBlock = 2;
+    else if ((consoleCommand >> 8) == 3)    // 48-63
+        currentBlock = 3;
+    else return;
+
+    currentCommand = consoleCommand & 0x0F;
+
+    if (currentBlock == 1)
+    {
+        if (currentCommand == 0)        // РС
+        {
+            rpzuNumber = 0;
+            plisNumber = 0;         // ПЛИС 1 или 2
+            plisType = 0;           // Отечка
+            rpzuFileNumber = 0;
+        }
+        if (currentCommand == 1)        // ШС
+        {
+            rpzuNumber = 0;
+            plisNumber = 1;         // ПЛИС 1 или 2
+            plisType = 0;           // Отечка
+            rpzuFileNumber = 1;
+        }
+        if (currentCommand == 2)        // Интерфейс А и Б - Циклон
+        {
+            rpzuNumber = 0;
+            plisNumber = 2;         // ПЛИС 2
+            plisType = 1;           // Циклон
+            rpzuFileNumber = 2;
+        }
+        else return;
+    }
+    if (currentBlock == 2)
+    {
+
+    }
+    if (currentBlock == 3)
+    {
+        if (currentCommand == 0)        // РСИ
+        {
+            rpzuNumber = 0;
+            plisNumber = 0;         // ПЛИС 1 или 2
+            plisType = 0;           // Отечка
+            rpzuFileNumber = 0;
+        }
+        if (currentCommand == 1)        // ШСИ
+        {
+            rpzuNumber = 0;
+            plisNumber = 1;         // ПЛИС 1 или 2
+            plisType = 0;           // Отечка
+            rpzuFileNumber = 1;
+        }
+        if (currentCommand == 2)        // Интерфейс А и Б - Циклон
+        {
+            rpzuNumber = 0;
+            plisNumber = 2;         // ПЛИС 1 или 2
+            plisType = 0;           // Отечка
+            rpzuFileNumber = 2;
+        }
+        if (currentCommand == 3)        // Интерфейс А и Б - Циклон
+        {
+            rpzuNumber = 0;
+            plisNumber = 3;         // ПЛИС 1 или 2
+            plisType = 0;           // Отечка
+            rpzuFileNumber = 2;
+        }
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+void testUartFunc(void)
+{
+    int i;
+    uint8_t consoleCommand = 0;
+    int consoleCommand2;
+    uint8_t data[14];
+    uint8_t dataAnswer[14];
+
+    for (i = 0; i < 14; i++)
+        data[i] = 0xdc;
+
+    printf("START\n");
+    //printf(" \n");
+
+    printf("Try to open port\n");
+    if(!init_com_port())
+        return;
+
+    printf("Try to configurate port\n");
+    if(!config_com_port())
+        return;
+
+    /*consoleCommand2 = testCommand();
+
+    if(!send_command(data))
+    {
+        printf("Error send char Command 3\n");
+        return FALSE;
+    }
+    if(!read_data_array_com_port(dataAnswer))
+    {
+        printf("Error read com port\n");
+        return FALSE;
+    }
+    for (i = 0; i < 14; i++)
+        printf("[%d] = %d ", i, dataAnswer[i]);*/
+
+    while(1)
+    {
+        consoleCommand2 = testCommand();
+        if (consoleCommand == 1)
+        {
+            //consoleCommand = 0;
+            printf("Send 0xAA\n");
+            for (i = 0; i < 14; i++)
+                data[i] = 0xAA;
+        }
+        if (consoleCommand == 2)
+        {
+            consoleCommand = 0;
+            printf("Send 0x55\n");
+            for (i = 0; i < 14; i++)
+                data[i] = 0x55;
+        }
+        printf("Prepare Send data\n");
+        /*if (testCommand() == 2)
+            printf("WOWWWW\n");*/
+        //else if ()
+        if(!send_data(data, 14))
+        {
+            printf("\nError send array\n");
+            return FALSE;
+        }
+
+        if(!read_data_array_com_port(dataAnswer))
+        {
+            printf("Error read com port\n");
+            return FALSE;
+        }
+        for (i = 0; i < 14; i++)
+            printf("[%d] = %d ", i, dataAnswer[i]);
+        printf("\n");
+
+        if (consoleCommand2 == 9)
+            break;
+
+        consoleCommand++;
+
+    }
+
+
+    printf("Prepare To Close Port\n");
+    close_com_port();
+    printf("Successfully Closed Port!\n");
+
+    printf("END\n");
+}
+
+
+
+
+
+
+
+
+
+
 
 

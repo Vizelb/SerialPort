@@ -9,7 +9,7 @@
 void InitConsoleControl();
 uint8_t InputCommand();
 
-
+int testCommand(void);
 
 
 #endif

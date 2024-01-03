@@ -50,5 +50,14 @@ uint8_t InputCommand()
     return command;
 }
 
+int testCommand(void)
+{
+    int command;
+    printf("Input command\n");
+    scanf("%d", &command);
+    printf("Command - %X\n", command);
+    return command;
+}
+
 
 

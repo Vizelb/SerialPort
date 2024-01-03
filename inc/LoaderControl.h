@@ -105,4 +105,12 @@ BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis);
 BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint32_t currentPlis, uint8_t codeCommand);
 
 
+// New Structura
+void newMainFunc(void);
+void CheckCommandControl(int consoleCommand);
+
+// Testes
+void testUartFunc(void);
+
+
 #endif // LOADER_CONTROL_H
