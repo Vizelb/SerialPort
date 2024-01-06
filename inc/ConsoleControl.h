@@ -7,9 +7,9 @@
 #include <windows.h>
 
 void InitConsoleControl();
-uint8_t InputCommand();
+int InputCommand(void);
 
-int testCommand(void);
+int DuConsoleCommand(void);
 
 
 #endif

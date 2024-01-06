@@ -42,8 +42,8 @@ BOOL send_data(uint8_t *dataArray, uint16_t arraySize);
 void close_com_port();
 
 
-BOOL read_data_array_com_port(uint8_t *answerMk);
-BOOL read_command_com_port(uint8_t *data);
+BOOL read_data_array_com_port(uint8_t *answerMk, uint16_t dataSize);
+BOOL read_command_com_port(uint8_t *data, uint16_t dataSize);
 void CancelFunctiontIoEx();
 
 

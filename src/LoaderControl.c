@@ -2,6 +2,7 @@
 #include "../inc/PortMenu.h"
 #include "../inc/WorkWithFile.h"
 #include "../inc/ConsoleControl.h"
+#include "../inc/CommandConsoleMaker.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,10 +20,13 @@
 
 #include <stdbool.h>*/
 
+
 uint8_t rpzuNumber;
-uint8_t plisNumber;
+uint8_t plisNum;
 uint8_t plisType;
 uint8_t rpzuFileNumber;
+
+uint8_t currentBlock;
 
 #define BREAK_LINE()    printf("//////// ////////\n\n")
 extern HANDLE hComm;
@@ -135,7 +139,7 @@ BOOL TransmitCommandControl(HANDLE hComm, uint32_t currentPlis, uint8_t codeComm
     //CancelFunctiontIoEx();
 
     printf("Prepare To Read\n");
-    if(!read_command_com_port(commandAnswer))
+    if(!read_command_com_port(commandAnswer, 14))
     {
         printf("Error read com port Command\n");
         return FALSE;
@@ -210,12 +214,12 @@ void FormCommandDu(uint8_t *command, uint32_t currentPlis, uint8_t codeCommand)
     struct CommandDu duCommand;
 
     duCommand.command.bytes.code = codeCommand;
-    duCommand.command.bytes.sec_byte = 0x00;    //sbp;      currentPlis;
+    duCommand.command.bytes.second_byte.value = 0x00;    //sbp;      currentPlis;
 
     duCommand.command.bytes.third_byte.bits.NumRPZU = rpzuNumber;
     duCommand.command.bytes.third_byte.bits.EMPTY = 0x00;
 
-    duCommand.command.bytes.four_byte.bits.NumPLIS = plisNumber;
+    //duCommand.command.bytes.four_byte.bits.NumPLIS = plisNumber;
     duCommand.command.bytes.four_byte.bits.TypePLIS = plisType;
     duCommand.command.bytes.four_byte.bits.NumFileRPZU = rpzuFileNumber;
 
@@ -300,9 +304,9 @@ BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint32_t currentPlis, uint8_t co
 
     if (headAnswer.answer.bytes.code != codeCommand)
         return FALSE;
-    if (headAnswer.answer.bytes.plisNumber != currentPlis)
-        return FALSE;
-    for (i = 0; i < 8; i++)
+    /*if (headAnswer.answer.bytes.plisNumber != currentPlis)
+        return FALSE;*/
+    for (i = 0; i < 7; i++)
         if (headAnswer.answer.bytes.emptyBytes[i] != 0x00){
             printf("error 3");
             return FALSE;
@@ -323,40 +327,44 @@ BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *an
     uint32_t crc32;
     uint16_t sizeToTransmit = arraySize;
 
-    if (arraySize != 512)
+    /*if (arraySize != 512)
     {
         for (i = arraySize; i < 512; i++)
             dataArray[i] = 0x00;
-    }
+    }*/
 
     /*for (i = 0; i < 516; i++)
         printf("\ncommand[%d] =  %x", i, dataArray[i]);
     printf("\n");*/
 
     printf("\nArray Size = %d", arraySize);
-    printf("\nArray Size = %d", sizeToTransmit);
-    crc32 = CRC32(dataArray, 512);
+    printf("\nArray Size To Transmit = %d", sizeToTransmit);
+    crc32 = CRC32(dataArray, sizeToTransmit);
     for (i = 0; i < 4; i++)
-        dataArray[512 + i] = crc32 >> (i*8);
+        dataArray[sizeToTransmit + i] = crc32 >> (i*8);
 
-
-    /*for (i = 0; i < 516; i++)
-        printf("\ncommand[%d] =  %x", i, dataArray[i]);
-    printf("\n");*/
-
+    printf("\n");
+    for (i = 0; i < sizeToTransmit+4; i++)
+        printf("[%d] =  %x  ", i, dataArray[i]);
+    printf("\n");
+    printf("Спим 1 секунду\n");
+    //sleep(1);
+    Sleep(80);
+    //usleep(500000);
+    printf("Поспали\n");
     if(!send_data(dataArray, sizeToTransmit + 4))
     {
         printf("\nError send array\n");
         return FALSE;
     }
-    printf("\n  1  No ERROR send array\n");
-    if(!read_data_array_com_port(answerMk))
+    printf("\n  Wait to read request\n");
+    if(!read_data_array_com_port(answerMk, 14))
     {
         printf("Error read com port\n");
         return FALSE;
     }
     printf("\n  2  No ERROR send array\n");
-    if (!CheckAnswerCommand(answerMk, currentPlisAnswer, K_R_D))
+    if (!CheckAnswerCommand(answerMk, currentPlisAnswer, 0x91))
     {
         printf("Error read com port DATA - check bytes\n");
         return FALSE;
@@ -371,12 +379,8 @@ BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *an
 void newMainFunc(void)
 {
     int i;
-    uint8_t consoleCommand = 0;
-    int consoleCommand2;
-    uint8_t data[14];
-
-    for (i = 0; i < 14; i++)
-        data[i] = 0x55;
+    int consoleCommand;
+    //uint8_t data[14];
 
     printf("START\n");
     //printf(" \n");
@@ -390,37 +394,38 @@ void newMainFunc(void)
         return;
 
     // WORK:
-/*do{
-
-        //CancelIoEx(hComm, NULL);
-    } while (consoleCommand == 2);*/
     while(1)
     {
-        consoleCommand2 = testCommand();
-        if (consoleCommand == 1)
-        {
-            //consoleCommand = 0;
-            printf("Send 0xAA\n");
-            for (i = 0; i < 14; i++)
-                data[i] = 0xAA;
-        }
-        if (consoleCommand == 2)
-        {
-            consoleCommand = 0;
-            printf("Send 0x55\n");
-            for (i = 0; i < 14; i++)
-                data[i] = 0x55;
-        }
-        printf("Prepare Send data\n");
-        /*if (testCommand() == 2)
-            printf("WOWWWW\n");*/
-        //else if ()
-        if(!send_data(data, 14))
+        consoleCommand = DuConsoleCommand();
+
+        if (consoleCommand == 9)
+            break;
+
+        CommandConsoleMaker(consoleCommand, command);
+
+        for (i = 0; i < 14; i++)
+            printf("%X ", command[i]);
+        printf(" \n");
+
+        if(!send_data(command, 14))
         {
             printf("\nError send array\n");
             return FALSE;
         }
-        consoleCommand++;
+
+        printf("Prepare To Read\n");
+        if(!read_command_com_port(commandAnswer, 14))
+        {
+            printf("Error read com port Command\n");
+            return FALSE;
+        }
+        for (i = 0; i < 14; i++)
+            printf("%X ", commandAnswer[i]);
+        printf(" \n");
+
+        printf("Start Loading File \n");
+        if (!InitWorkWithFileDuPoUpdate())
+            return FALSE;
 
     }
 
@@ -434,7 +439,7 @@ void newMainFunc(void)
 
 void CheckCommandControl(int consoleCommand)
 {
-    uint8_t currentBlock;
+
     uint32_t currentCommand;
 
     if ((consoleCommand >> 8) == 1)         // 16-31
@@ -452,21 +457,21 @@ void CheckCommandControl(int consoleCommand)
         if (currentCommand == 0)        // РС
         {
             rpzuNumber = 0;
-            plisNumber = 0;         // ПЛИС 1 или 2
+            //plisNumber = 0;         // ПЛИС 1 или 2
             plisType = 0;           // Отечка
             rpzuFileNumber = 0;
         }
         if (currentCommand == 1)        // ШС
         {
             rpzuNumber = 0;
-            plisNumber = 1;         // ПЛИС 1 или 2
+            //plisNumber = 1;         // ПЛИС 1 или 2
             plisType = 0;           // Отечка
             rpzuFileNumber = 1;
         }
         if (currentCommand == 2)        // Интерфейс А и Б - Циклон
         {
             rpzuNumber = 0;
-            plisNumber = 2;         // ПЛИС 2
+            //plisNumber = 2;         // ПЛИС 2
             plisType = 1;           // Циклон
             rpzuFileNumber = 2;
         }
@@ -481,28 +486,28 @@ void CheckCommandControl(int consoleCommand)
         if (currentCommand == 0)        // РСИ
         {
             rpzuNumber = 0;
-            plisNumber = 0;         // ПЛИС 1 или 2
+            //plisNumber = 0;         // ПЛИС 1 или 2
             plisType = 0;           // Отечка
             rpzuFileNumber = 0;
         }
         if (currentCommand == 1)        // ШСИ
         {
             rpzuNumber = 0;
-            plisNumber = 1;         // ПЛИС 1 или 2
+            //plisNumber = 1;         // ПЛИС 1 или 2
             plisType = 0;           // Отечка
             rpzuFileNumber = 1;
         }
         if (currentCommand == 2)        // Интерфейс А и Б - Циклон
         {
             rpzuNumber = 0;
-            plisNumber = 2;         // ПЛИС 1 или 2
+            //plisNumber = 2;         // ПЛИС 1 или 2
             plisType = 0;           // Отечка
             rpzuFileNumber = 2;
         }
         if (currentCommand == 3)        // Интерфейс А и Б - Циклон
         {
             rpzuNumber = 0;
-            plisNumber = 3;         // ПЛИС 1 или 2
+            //plisNumber = 3;         // ПЛИС 1 или 2
             plisType = 0;           // Отечка
             rpzuFileNumber = 2;
         }
@@ -558,7 +563,7 @@ void testUartFunc(void)
 
     while(1)
     {
-        consoleCommand2 = testCommand();
+        //consoleCommand2 = testCommand();
         if (consoleCommand == 1)
         {
             //consoleCommand = 0;
@@ -583,7 +588,7 @@ void testUartFunc(void)
             return FALSE;
         }
 
-        if(!read_data_array_com_port(dataAnswer))
+        if(!read_data_array_com_port(dataAnswer, 14))
         {
             printf("Error read com port\n");
             return FALSE;

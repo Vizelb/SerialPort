@@ -13,8 +13,8 @@ int main()
 
     //InitPortMenu();         // Main Work Function
 
-    //newMainFunc();
-    testUartFunc();
+    newMainFunc();
+    //testUartFunc();
 
 
 

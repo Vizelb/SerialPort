@@ -18,5 +18,8 @@ int hex_to_ascii(char c, char d);
 int hexChrBin(const char hex, char *out);
 void to_hex_16(char *output, unsigned n);
 
+//  NewMain
+BOOL InitWorkWithFileDuPoUpdate();
+BOOL OpenFileForPortDuPoUpdate();
 
 #endif

@@ -229,7 +229,7 @@ BOOL send_data(uint8_t *dataArray, uint16_t arraySize)
 }
 
 
-BOOL read_data_array_com_port(uint8_t *answerMk)
+BOOL read_data_array_com_port(uint8_t *answerMk, uint16_t dataSize)
 {
 
     int i = 0;
@@ -237,7 +237,7 @@ BOOL read_data_array_com_port(uint8_t *answerMk)
     COMSTAT comstat;
 
     DWORD dwBytesRead = 0;          // кол-во прочитанных байтов
-    DWORD btr = 14;
+    DWORD btr = dataSize;
     DWORD temp, mask, signal;
     //overlapped.hEvent = CreateEvent (NULL, true, true, NULL);
 
@@ -269,7 +269,7 @@ BOOL read_data_array_com_port(uint8_t *answerMk)
     return TRUE;
 }
 
-BOOL read_command_com_port(uint8_t *data)
+BOOL read_command_com_port(uint8_t *data, uint16_t dataSize)
 {
     uint8_t chRet = '\0';
     int i = 0;
@@ -277,7 +277,7 @@ BOOL read_command_com_port(uint8_t *data)
     COMSTAT comstat;
 
     DWORD dwBytesRead = 0;          // кол-во прочитанных байтов
-    DWORD btr = 14;
+    DWORD btr = dataSize;
     DWORD temp, mask, signal;
     //overlapped.hEvent = CreateEvent (NULL, true, true, NULL);
 
@@ -295,7 +295,7 @@ BOOL read_command_com_port(uint8_t *data)
                     result = temp;
             for (i = 0; i < temp; i++)
             {
-                printf("%X, ", data[i]);
+                printf("%X ", data[i]);
                 //printf(";");
             }
             //printf("\n%dx\n", &data);

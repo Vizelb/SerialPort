@@ -23,6 +23,18 @@ typedef struct CommandToMk
 };
 
 
+struct SecondBitsCommandDu{
+    uint8_t
+        AMP:3,
+        EMPTY:1,
+        SBP:2,
+        EMPTY2:2;
+};
+union SecondByteCommandDu{
+    uint8_t value;
+    struct SecondBitsCommandDu bits;
+};
+
 struct ThirdBitsCommandDu{
     uint8_t
         NumRPZU:4,
@@ -35,9 +47,9 @@ union ThirdByteCommandDu{
 
 struct FourthBitsCommandDu{
     uint8_t
-        NumPLIS:2,
-        TypePLIS:2,
-        NumFileRPZU:4;
+        NumPLIS     :2,
+        TypePLIS    :2,
+        NumFileRPZU :4;
 };
 union FourthByteCommandDu{
     uint8_t value;
@@ -50,7 +62,7 @@ union FormCommandDu
     struct
     {
         uint8_t code;
-        uint8_t sec_byte;
+        union SecondByteCommandDu second_byte;
         union ThirdByteCommandDu third_byte;
         union FourthByteCommandDu four_byte;
         uint8_t emptyBytes[6];
@@ -71,8 +83,9 @@ union AnalysisAnswerFromMk
     struct
     {
         uint8_t code;
-        uint8_t plisNumber;
-        uint8_t emptyBytes[8];
+        uint8_t plisNumber;     // change to Sec_Byte
+        uint8_t kpk;
+        uint8_t emptyBytes[7];
         uint8_t Crc32[4];
     } bytes;
 };

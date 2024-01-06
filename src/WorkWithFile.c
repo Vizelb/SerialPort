@@ -12,11 +12,11 @@
 
 FILE *file;
 
-char proshivkaPlis1[] = "D:/Danya/Libary/C/DD13_TEST.rbf";
-char proshivkaPlis2[] = "D:/Danya/Libary/C/DD14_TEST.rbf";
-char proshivkaPlisCyclone[] = "D:/Danya/Libary/C/TEST_rekurrenta_Cyclone_4.rbf";
-char proshivkaPlis3[] = "D:/Danya/Libary/C/MM937_TEST_DD1_2.rbf";
-char proshivkaPlis4[] = "D:/Danya/Libary/C/MM937_TEST_DD1_2.rbf";
+char proshivkaPlis1[] =         "D:/Danya/Libary/C/DD13_TEST.rbf";
+char proshivkaPlis2[] =         "D:/Danya/Libary/C/DD14_TEST.rbf";
+char proshivkaPlisCyclone[] =   "D:/Danya/Libary/C/TEST_rekurrenta_Cyclone_4.rbf";
+char proshivkaPlis3[] =         "D:/Danya/Libary/C/MM937_TEST_DD1_2.rbf";
+char proshivkaPlis4[] =         "D:/Danya/Libary/C/MM937_TEST_DD1_2.rbf";
 
 uint32_t counterPlis = 0;
 uint8_t bufferRead[516];    // было 512
@@ -26,6 +26,8 @@ char c;
 int num;
 
 extern switcherPlis;
+
+extern struct CommandDu commandDu;  // CommandConsoleMaker.c
 
 //fopen(D:\Danya\Libary\C\test1, "r");  // открыть файл (имя, на чтение)
 //fopen(D:/Danya/Libary/C/test1, "r");  // открыть файл (имя, на чтение)
@@ -52,6 +54,23 @@ BOOL InitWorkWithFile(uint32_t currentPlis)
 
 }
 
+BOOL InitWorkWithFileDuPoUpdate()
+{
+    int i;
+
+    if (!OpenFileForPortDuPoUpdate())
+        return FALSE;
+    Sleep(1000);
+    if(!ReadFromFile())
+        return FALSE;
+
+    fclose(file);     // закрытие файла
+
+    printf("\n\n\n\n END OF WORK WRITE/READ FILE");
+
+    return TRUE;
+
+}
 
 uint32_t GetFileSizeMy()
 {
@@ -152,12 +171,12 @@ BOOL ReadFromFile()
                 //bufferPlis[counterPlis] = bufferRead[i];
                 counterPlis++;
             }
-            if (sizeRead != 512)
+            /*if (sizeRead != 512)
             {
                 printf("\nSkolko prochitali = %d ", sizeRead);
                 for(i = 0; i < sizeof(bufferRead); i++)
                     printf("%x ", bufferRead[i]);   // d - print in hex
-            }
+            }*/
             if (!TransmitPartOfProshivka(bufferRead, sizeRead, answerMk))
             {
                 printf("ERROR OSTATOK FILE!!");
@@ -268,6 +287,86 @@ BOOL OpenFileForPort(uint32_t currentPlis)
     }
     return TRUE;
 }
+
+BOOL OpenFileForPortDuPoUpdate()
+{
+    printf("\n");
+    printf("numRPZU = %d\n", commandDu.command.bytes.third_byte.bits.NumRPZU);
+    printf("TypePLIS = %d\n", commandDu.command.bytes.four_byte.bits.TypePLIS);
+    printf("AMP = %d\n", commandDu.command.bytes.second_byte.bits.AMP);
+    printf("NumFileRPZU = %d\n", commandDu.command.bytes.four_byte.bits.NumFileRPZU);
+    printf("NumPLIS = %d\n", commandDu.command.bytes.four_byte.bits.NumPLIS);
+    if (commandDu.command.bytes.third_byte.bits.NumRPZU == 0)   // RPZU 0
+    {
+        if (commandDu.command.bytes.four_byte.bits.TypePLIS != 0)
+            return FALSE;
+        if (commandDu.command.bytes.second_byte.bits.AMP == 1 || commandDu.command.bytes.second_byte.bits.AMP == 2)
+        {
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 0 && commandDu.command.bytes.four_byte.bits.NumPLIS == 0)
+                file = fopen(proshivkaPlis1, "rb");
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 1 && commandDu.command.bytes.four_byte.bits.NumPLIS == 1)
+                file = fopen(proshivkaPlis2, "rb");
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 2 && commandDu.command.bytes.four_byte.bits.NumPLIS == 0)
+                file = fopen(proshivkaPlis1, "rb");
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 3 && commandDu.command.bytes.four_byte.bits.NumPLIS == 1)
+                file = fopen(proshivkaPlis2, "rb");
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 4 && commandDu.command.bytes.four_byte.bits.NumPLIS == 0)
+                file = fopen(proshivkaPlis1, "rb");
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 5 && commandDu.command.bytes.four_byte.bits.NumPLIS == 1)
+                file = fopen(proshivkaPlis2, "rb");
+        }
+        if (commandDu.command.bytes.second_byte.bits.AMP == 3)
+        {
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 0 && commandDu.command.bytes.four_byte.bits.NumPLIS == 0)
+                file = fopen(proshivkaPlis1, "rb");
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 1 && commandDu.command.bytes.four_byte.bits.NumPLIS == 1)
+                file = fopen(proshivkaPlis2, "rb");
+        }
+    }
+    if (commandDu.command.bytes.third_byte.bits.NumRPZU == 1) // RPZU 1
+    {
+        if (commandDu.command.bytes.second_byte.bits.AMP == 1 || commandDu.command.bytes.second_byte.bits.AMP == 2 || commandDu.command.bytes.second_byte.bits.AMP == 3)
+        {
+            if (commandDu.command.bytes.four_byte.bits.TypePLIS != 0)
+                return FALSE;
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 0 && commandDu.command.bytes.four_byte.bits.NumPLIS == 0)
+                file = fopen(proshivkaPlis1, "rb");
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 1 && commandDu.command.bytes.four_byte.bits.NumPLIS == 1)
+                file = fopen(proshivkaPlis2, "rb");
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 2 && commandDu.command.bytes.four_byte.bits.NumPLIS == 0)
+                file = fopen(proshivkaPlis1, "rb");
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 3 && commandDu.command.bytes.four_byte.bits.NumPLIS == 1)
+                file = fopen(proshivkaPlis2, "rb");
+        }
+        if (commandDu.command.bytes.second_byte.bits.AMP == 1 || commandDu.command.bytes.second_byte.bits.AMP == 2) // Interface Block-A/B
+        {
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 4)
+                if (commandDu.command.bytes.four_byte.bits.TypePLIS == 1)
+                    if (commandDu.command.bytes.four_byte.bits.NumPLIS == 2)
+                        file = fopen(proshivkaPlisCyclone, "rb");
+        }
+        if (commandDu.command.bytes.second_byte.bits.AMP == 3)      // Interface Block-V
+        {
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU != 4)
+                return FALSE;
+            if (commandDu.command.bytes.four_byte.bits.TypePLIS != 0)
+                return FALSE;
+            if (commandDu.command.bytes.four_byte.bits.NumPLIS == 2)
+                file = fopen(proshivkaPlis3, "rb");
+        }
+    }
+
+    if (file == NULL)
+    {
+        printf("Error Open File");
+        return FALSE;
+    }
+    return TRUE;
+}
+
+
+
+
 
 void CloseFileForPort()
 {
