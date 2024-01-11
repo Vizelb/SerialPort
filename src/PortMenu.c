@@ -70,7 +70,7 @@ void InitPortMenu()
 
     // #3
     printf("Start Work\n");
-    commandPlis = InputCommand();
+    commandPlis = ConsoleCommandDkDriverUpdate();
     if(CheckCurrentPlis(commandPlis, &currentPlis))
     {
         if (!StartLoadingFile(hComm, currentPlis))
@@ -207,7 +207,7 @@ BOOL send_data(uint8_t *dataArray, uint16_t arraySize)
     int i;
     DWORD dwBytesWritten;
     DWORD feedBack;
-    printf("Start Send data\n");
+    //printf("Start Send data\n");
 
     if (WriteFile(hComm,            // дескриптор устр
                   dataArray,              // указатель на буфер
@@ -217,7 +217,7 @@ BOOL send_data(uint8_t *dataArray, uint16_t arraySize)
         || feedBack != (DWORD)sizeof(dataArray)
         )
         {
-            printf("End Send data\n");
+            //printf("End Send data\n");
         return TRUE;
         }
     else{

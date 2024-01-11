@@ -17,7 +17,7 @@ union FormCommandToMk
     } bytes;
     //Command_To_Mk byte;
 };
-typedef struct CommandToMk
+typedef struct CommandToMkDkUpdate
 {
     union FormCommandToMk command;
 };
@@ -107,8 +107,7 @@ void InitLoaderControl();
 //
 BOOL StartLoadingFile(HANDLE hComm, uint32_t currentPlis);
 // #1 First function - KKU to init process
-BOOL TransmitCommandControl(HANDLE hComm, uint32_t currentPlis, uint8_t codeCommand);
-void FormCommand(uint8_t *command, uint32_t currentPlis, uint8_t codeCommand);
+BOOL TransmitCommandControl(HANDLE hComm, uint32_t currentPlis);
 void FormCommandDu(uint8_t *command, uint32_t currentPlis, uint8_t codeCommand);    // Update
 // #2 Second function
 BOOL TransmitDataFile(uint32_t currentPlis);
@@ -120,6 +119,7 @@ BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint32_t currentPlis, uint8_t co
 
 // New Structura
 void newMainFunc(void);
+BOOL CommandLoadDuPoPlis(); // Load PO PLIS
 void CheckCommandControl(int consoleCommand);
 
 // Testes
