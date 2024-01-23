@@ -11,9 +11,12 @@ int main()
 {
     int i = 1;
 
-    //InitPortMenu();         // Main Work Function
+    //InitPortMenu();         // Main Work Function v1.0
 
-    newMainFunc();
+    //ReadBufferShum();   // Func for read buff for check BA285
+    newMainFunc();    // MAIN NEW WORK FUNCTION v2.0
+
+
     //testUartFunc();
 
 

@@ -12,11 +12,11 @@
 
 FILE *file;
 
-char proshivkaPlis1[] =         "D:/Danya/Libary/C/DD13_TEST.rbf";
-char proshivkaPlis2[] =         "D:/Danya/Libary/C/DD14_TEST.rbf";
+char proshivkaPlis1[] =         "D:/Danya/Libary/C/MM935_1_1_noise.rbf";
+char proshivkaPlis2[] =         "D:/Danya/Libary/C/MM935_2_1_noise.rbf";
 char proshivkaPlisCyclone[] =   "D:/Danya/Libary/C/TEST_BA435_PSC.rbf";
-char proshivkaPlis3[] =         "D:/Danya/Libary/C/MM937_TEST_DD1_2.rbf";
-char proshivkaPlis4[] =         "D:/Danya/Libary/C/MM937_TEST_DD1_2.rbf";
+char proshivkaPlis3[] =         "D:/Danya/Libary/C/TEST_REKURRENTA_5576.rbf";
+char proshivkaPlis4[] =         "D:/Danya/Libary/C/TEST_REKURRENTA_5576.rbf";
 
 uint32_t counterPlis = 0;
 uint8_t bufferRead[516];    // было 512
@@ -322,6 +322,7 @@ BOOL OpenFileForPortDuPoUpdate()
     printf("AMP = %d\n", commandDu.command.bytes.second_byte.bits.AMP);
     printf("NumFileRPZU = %d\n", commandDu.command.bytes.four_byte.bits.NumFileRPZU);
     printf("NumPLIS = %d\n", commandDu.command.bytes.four_byte.bits.NumPLIS);
+    printf("AAAAAAAAAAAAAAA\n");
     if (commandDu.command.bytes.third_byte.bits.NumRPZU == 0)   // RPZU 0
     {
         if (commandDu.command.bytes.four_byte.bits.TypePLIS != 0)
@@ -384,7 +385,7 @@ BOOL OpenFileForPortDuPoUpdate()
 
     if (file == NULL)
     {
-        printf("Error Open File");
+        printf("\nError Open File\n");
         return FALSE;
     }
     return TRUE;

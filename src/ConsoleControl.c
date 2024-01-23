@@ -127,6 +127,15 @@ int ConsoleCommandDkDriverUpdate(void)
 }
 
 
+int JustInputConsoleCommand(void)
+{
+    int command = 0;
+    printf("Input command <5> to continue\n");
+    scanf("%d", &command);
+    return command;
+}
+
+
 
 
 

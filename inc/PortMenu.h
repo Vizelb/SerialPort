@@ -6,13 +6,15 @@
 
 #include <windows.h>
 
+#define SIZE_DATA_TO_PC     ((uint32_t) 0x1)
+
 #define READ_TIME_COMMAND   ((int) 100)     // const int
-#define READ_TIME_DATA      ((int) 500)
+#define READ_TIME_DATA      ((int) 20000)    // было 500
 
 #define SERIAL_PORT         "COM4"
 #define BOAD_RATE           CBR_19200
 //#define BOAD_RATE           ((int) 19200)
-//#define SERIAL_PORT         ((LPCTSTR) COM4)
+//#define SERIAL_PORT         ((LPCTSTR) COM2)
 
 #define PLIS1               ((uint32_t) 0x60)
 #define PLIS2               ((uint32_t) 0x70)
@@ -41,11 +43,14 @@ BOOL send_data(uint8_t *dataArray, uint16_t arraySize);
 //BOOL read_com_port();                 // old
 void close_com_port();
 
+BOOL read_data_array_com_port_UPGRADE(uint8_t *answerMk, uint16_t dataSize);
+
 
 BOOL read_data_array_com_port(uint8_t *answerMk, uint16_t dataSize);
 BOOL read_command_com_port(uint8_t *data, uint16_t dataSize);
 void CancelFunctiontIoEx();
 
-
+// Read Shum
+void ReadBufferShum();
 
 #endif // PORT_MENU_H

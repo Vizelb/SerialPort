@@ -12,5 +12,7 @@ int DuConsoleCommand(void);
 void CommandPoPlisDuUpdate();       // 1
 int ConsoleCommandDkDriverUpdate(void);    // 2
 
+int JustInputConsoleCommand(void);
+
 
 #endif
