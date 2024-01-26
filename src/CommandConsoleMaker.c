@@ -16,6 +16,8 @@ void CommandConsoleMaker(int consoleCommand, uint8_t *data)
 {
     if (consoleCommand == 1)
         FormCommandLoadDuPoPlis(data);
+    if (consoleCommand == 2)
+        FormCommandLoadDuPoPlis(data);
     else return;
 
 }

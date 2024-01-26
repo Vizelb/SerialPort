@@ -11,8 +11,10 @@
 #define READ_TIME_COMMAND   ((int) 100)     // const int
 #define READ_TIME_DATA      ((int) 20000)    // было 500
 
-#define SERIAL_PORT         "COM4"
-#define BOAD_RATE           CBR_19200
+#define COM_PORT_4          "COM4"
+#define COM_PORT_9          "COM9"
+#define BOAD_RATE_9600      CBR_19200
+#define BOAD_RATE_115200    CBR_115200
 //#define BOAD_RATE           ((int) 19200)
 //#define SERIAL_PORT         ((LPCTSTR) COM2)
 
@@ -36,8 +38,8 @@ void ConfigurateSerialPort();
 
 // 2 variant
 BOOL WorkCycle();
-BOOL init_com_port();
-BOOL config_com_port();
+BOOL init_com_port(char *com_port);
+BOOL config_com_port(int baudRate);
 BOOL send_command(uint8_t *command);
 BOOL send_data(uint8_t *dataArray, uint16_t arraySize);
 //BOOL read_com_port();                 // old

@@ -39,8 +39,9 @@ int DuConsoleCommand(void)
     int command;
 
     printf("Input command\n");
-    printf("1 - download driver for PLIS in MM935/BA435/MM937\n");
-    printf("2 - update Dk (D6) driver\n");
+    printf("1 - Create own commands to download driver for PLIS in MM935/BA435/MM937\n");
+    printf("2 - Commands to download driver for PLIS in MM935/BA435/MM937\n");
+    printf("3 - update Dk (D6) driver\n");
     printf("9 - End of Work\n");
     scanf("%d", &command);
     printf("Command - %X\n", command);
@@ -48,6 +49,8 @@ int DuConsoleCommand(void)
     if (command == 1)
         CommandPoPlisDuUpdate();
     if (command == 2)
+        CommandPoPlisDuProtocol();
+    if (command == 3)
         commandPlis = ConsoleCommandDkDriverUpdate();
 
     if (command == 9)
@@ -98,6 +101,158 @@ void CommandPoPlisDuUpdate()
 
     rpzuFileNumber = rpzuFileNumberTemp;
     printf("Command rpzuFileNumber - %X\n", rpzuFileNumber);*/
+}
+
+void CommandPoPlisDuProtocol()
+{
+    int command = 0;
+
+    printf("\nInput currentBlock\n 1 - Block A;\n 2 - Block B;\n 3 - Block V;\n");
+    scanf("%d", &currentBlockTemp);
+    currentBlock = currentBlockTemp;
+    //printf("Command currentBlock - %X\n", currentBlock);
+    printf("\n");
+    // DESCRIPTION
+    if (currentBlock == 1 || currentBlock == 2) {
+        printf("1. PC - block A, B\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 0, type of PLIS = 0, ¹ PLIS = 0\n");
+
+        printf("2. LLIC - block A, B\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 1, type of PLIS = 0, ¹ PLIS = 1\n");
+
+        printf("3. PPC - block A, B\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 2, type of PLIS = 0, ¹ PLIS = 0\n");
+
+        printf("4. PLLIC - block A, B\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 3, type of PLIS = 0, ¹ PLIS = 1\n");
+    }
+
+    if (currentBlock == 3) {
+        printf("5. PCU - block V\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 0, type of PLIS = 0, ¹ PLIS = 0\n");
+
+        printf("6. LLICU - block V\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 1, type of PLIS = 0, ¹ PLIS = 1\n");
+    }
+
+    if (currentBlock == 1 || currentBlock == 2) {
+        printf("7. PK - block A, B\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 4, type of PLIS = 0, ¹ PLIS = 0\n");
+
+        printf("8. LLIK - block A, B\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 5, type of PLIS = 0, ¹ PLIS = 1\n");
+    }
+
+    if (currentBlock == 1 || currentBlock == 2 || currentBlock == 3) {
+        printf("9. Transit - block A, B, V \n");
+        printf("Description: nCE_EPROM_2, File in RPZU = 0, type of PLIS = 0, ¹ PLIS = 0\n");
+
+        printf("10. Transit - block A, B, V\n");
+        printf("Description: nCE_EPROM_2, File in RPZU = 1, type of PLIS = 0, ¹ PLIS = 1\n");
+
+        printf("11. KPA - block A, B, V\n");
+        printf("Description: nCE_EPROM_2, File in RPZU = 2, type of PLIS = 0, ¹ PLIS = 0\n");
+
+        printf("12. KPA - block A, B, V\n");
+        printf("Description: nCE_EPROM_2, File in RPZU = 3, type of PLIS = 0, ¹ PLIS = 1\n");
+    }
+
+    if (currentBlock == 1 || currentBlock == 2) {
+        printf("13. Interface - block A, B\n");
+        printf("Description: nCE_EPROM_2, File in RPZU = 4, type of PLIS = 1, ¹ PLIS = 2\n");
+    }
+
+    if (currentBlock == 3) {
+        printf("14. Interface - block V\n");
+        printf("Description: nCE_EPROM_2, File in RPZU = 4, type of PLIS = 0, ¹ PLIS = 2\n");
+    }
+
+    scanf("%d", &command);
+    if (command == 1){
+        rpzuNumber = 1;
+        rpzuFileNumber = 1;
+        plisType = 1;
+        plisNum = 1;
+    }
+    else if (command == 2){
+        rpzuNumber = 1;
+        rpzuFileNumber = 2;
+        plisType = 1;
+        plisNum = 2;
+    }
+    else if (command == 3){
+        rpzuNumber = 1;
+        rpzuFileNumber = 3;
+        plisType = 1;
+        plisNum = 1;
+    }
+    else if (command == 4){
+        rpzuNumber = 1;
+        rpzuFileNumber = 4;
+        plisType = 1;
+        plisNum = 2;
+    }
+    else if (command == 5){
+        rpzuNumber = 1;
+        rpzuFileNumber = 1;
+        plisType = 1;
+        plisNum = 1;
+    }
+    else if (command == 6){
+        rpzuNumber = 1;
+        rpzuFileNumber = 2;
+        plisType = 1;
+        plisNum = 2;
+    }
+    else if (command == 7){
+        rpzuNumber = 1;
+        rpzuFileNumber = 5;
+        plisType = 1;
+        plisNum = 1;
+    }
+    else if (command == 8){
+        rpzuNumber = 1;
+        rpzuFileNumber = 6;
+        plisType = 1;
+        plisNum = 2;
+    }
+    else if (command == 9){
+        rpzuNumber = 2;
+        rpzuFileNumber = 1;
+        plisType = 1;
+        plisNum = 1;
+    }
+    else if (command == 10){
+        rpzuNumber = 2;
+        rpzuFileNumber = 2;
+        plisType = 1;
+        plisNum = 2;
+    }
+    else if (command == 11){
+        rpzuNumber = 2;
+        rpzuFileNumber = 3;
+        plisType = 1;
+        plisNum = 1;
+    }
+    else if (command == 12){
+        rpzuNumber = 2;
+        rpzuFileNumber = 4;
+        plisType = 1;
+        plisNum = 2;
+    }
+    else if (command == 13){
+        rpzuNumber = 2;
+        rpzuFileNumber = 5;
+        plisType = 2;
+        plisNum = 3;
+    }
+    else if (command == 14){
+        rpzuNumber = 2;
+        rpzuFileNumber = 5;
+        plisType = 1;
+        plisNum = 3;
+    }
+    printf("Description Result: currentBlock = %d, nCE_EPROM_%d, File in RPZU = %d, type of PLIS = %d, ¹ PLIS = %d\n", currentBlock, rpzuNumber, rpzuFileNumber-1, plisType-1, plisNum-1);
 }
 
 int ConsoleCommandDkDriverUpdate(void)

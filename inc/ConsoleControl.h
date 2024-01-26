@@ -9,8 +9,9 @@
 void InitConsoleControl();
 
 int DuConsoleCommand(void);
-void CommandPoPlisDuUpdate();       // 1
-int ConsoleCommandDkDriverUpdate(void);    // 2
+void CommandPoPlisDuUpdate();               // 1
+void CommandPoPlisDuProtocol();             // 2
+int ConsoleCommandDkDriverUpdate(void);     // 3
 
 int JustInputConsoleCommand(void);
 

@@ -45,7 +45,7 @@ void InitPortMenu()
 
     // #1
     printf("Try to open port\n");
-    if (!init_com_port())
+    if (!init_com_port(COM_PORT_4))
     {
         printf("Error1\n");
         return;
@@ -54,7 +54,7 @@ void InitPortMenu()
 
     // #2
     printf("Try to configurate port\n");
-    if(!config_com_port())
+    if(!config_com_port(CBR_115200))
     {
         printf("Error2\n");
         return;
@@ -103,12 +103,12 @@ void ReadBufferShum()
     file = fopen("D:/Danya/Libary/C/newFileShum.bin", "wb");
 
     printf("Start\n");
-    if (!init_com_port())
+    if (!init_com_port(COM_PORT_9))
     {
         printf("Error Init Port\n");
         return;
     }
-    if(!config_com_port())
+    if(!config_com_port(CBR_9600))
     {
         printf("Error Config Port\n");
         return;
@@ -197,9 +197,9 @@ BOOL WorkCycle()
 
 
 // 2 variant - ‡·ÓÚ‡ÂÚ
-BOOL init_com_port()
+BOOL init_com_port(char *com_port)
 {
-    hComm = CreateFile(SERIAL_PORT/*"COM9"*/, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL); // –¿¡Œ“¿≈“ ÕŒ  –»¬Œ
+    hComm = CreateFile(com_port/*SERIAL_PORT*//*"COM9"*/, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL); // –¿¡Œ“¿≈“ ÕŒ  –»¬Œ
     //hComm = CreateFile("COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     //hComm = CreateFile(/*SERIAL_PORT*/"COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
     if (hComm == INVALID_HANDLE_VALUE)
@@ -211,15 +211,15 @@ BOOL init_com_port()
     return TRUE;
 }
 
-BOOL config_com_port()
+BOOL config_com_port(int baudRate)
 {
     DCB dcbSerialParams = {0};
     dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
     if (GetCommState(hComm, &dcbSerialParams) == FALSE)
         return FALSE;
 
-    dcbSerialParams.BaudRate = CBR_115200; //CBR_115200;
-    //dcbSerialParams.BaudRate = CBR_9600;
+    //dcbSerialParams.BaudRate = CBR_115200;    //CBR_115200;
+    dcbSerialParams.BaudRate = baudRate;        //CBR_9600;
     dcbSerialParams.ByteSize = 8;
     dcbSerialParams.Parity = NOPARITY;
     dcbSerialParams.StopBits = ONESTOPBIT;

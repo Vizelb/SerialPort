@@ -348,16 +348,16 @@ void newMainFunc(void)
         CommandConsoleMaker(consoleCommand, command);
 
         printf("\nTry to open port\n");
-        if(!init_com_port())
+        if(!init_com_port(COM_PORT_4))
             return;
 
         printf("Try to configurate port\n");
-        if(!config_com_port())
+        if(!config_com_port(CBR_115200))
             return;
 
-        if (consoleCommand == 1)
+        if (consoleCommand == 1 || consoleCommand == 2)
             CommandLoadDuPoPlis();
-        if (consoleCommand == 2)
+        if (consoleCommand == 3)
             InitLoaderControl();
 
         printf("Prepare To Close Port\n");
@@ -505,11 +505,11 @@ void testUartFunc(void)
     //printf(" \n");
 
     printf("Try to open port\n");
-    if(!init_com_port())
+    if(!init_com_port(COM_PORT_9))
         return;
 
     printf("Try to configurate port\n");
-    if(!config_com_port())
+    if(!config_com_port(CBR_9600))
         return;
 
     /*consoleCommand2 = testCommand();

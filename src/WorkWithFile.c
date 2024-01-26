@@ -322,7 +322,6 @@ BOOL OpenFileForPortDuPoUpdate()
     printf("AMP = %d\n", commandDu.command.bytes.second_byte.bits.AMP);
     printf("NumFileRPZU = %d\n", commandDu.command.bytes.four_byte.bits.NumFileRPZU);
     printf("NumPLIS = %d\n", commandDu.command.bytes.four_byte.bits.NumPLIS);
-    printf("AAAAAAAAAAAAAAA\n");
     if (commandDu.command.bytes.third_byte.bits.NumRPZU == 0)   // RPZU 0
     {
         if (commandDu.command.bytes.four_byte.bits.TypePLIS != 0)
