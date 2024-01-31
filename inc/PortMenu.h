@@ -6,7 +6,7 @@
 
 #include <windows.h>
 
-#define SIZE_DATA_TO_PC     ((uint32_t) 0x1)
+
 
 #define READ_TIME_COMMAND   ((int) 100)     // const int
 #define READ_TIME_DATA      ((int) 20000)    // было 500
@@ -28,7 +28,6 @@
 #define ALL_SET2            ((uint32_t) 0xC0)
 
 // Methods
-void InitPortMenu();
 
 // 1 variant
 void OpenSerialPort();
@@ -37,7 +36,7 @@ void ConfigurateSerialPort();
 
 
 // 2 variant
-BOOL WorkCycle();
+//BOOL WorkCycle();
 BOOL init_com_port(char *com_port);
 BOOL config_com_port(int baudRate);
 BOOL send_command(uint8_t *command);
@@ -45,14 +44,13 @@ BOOL send_data(uint8_t *dataArray, uint16_t arraySize);
 //BOOL read_com_port();                 // old
 void close_com_port();
 
-BOOL read_data_array_com_port_UPGRADE(uint8_t *answerMk, uint16_t dataSize);
+void read_data_array_com_port_Shum(uint8_t *answerMk, uint16_t dataSize);
 
 
 BOOL read_data_array_com_port(uint8_t *answerMk, uint16_t dataSize);
 BOOL read_command_com_port(uint8_t *data, uint16_t dataSize);
 void CancelFunctiontIoEx();
 
-// Read Shum
-void ReadBufferShum();
+
 
 #endif // PORT_MENU_H
