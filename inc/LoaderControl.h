@@ -123,11 +123,9 @@ BOOL CommandLoadDuPoPlis(); // Load PO PLIS
 void CheckCommandControl(int consoleCommand);
 
 // Testes
-void testUartFunc(void);
+//void testUartFunc(void);
 
 
-// Read Shum
-void ReadBufferShum();
 
 
 #endif // LOADER_CONTROL_H

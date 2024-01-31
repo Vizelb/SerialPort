@@ -27,29 +27,21 @@
 #define ALL_SET1            ((uint32_t) 0xB0)
 #define ALL_SET2            ((uint32_t) 0xC0)
 
+
+
 // Methods
-
-// 1 variant
-void OpenSerialPort();
-void ConfigurateSerialPort();
-
-
-
-// 2 variant
-//BOOL WorkCycle();
+// Config Functions
+BOOL SetSettingsComPort(char *com_port, int baudRate);
 BOOL init_com_port(char *com_port);
 BOOL config_com_port(int baudRate);
-BOOL send_command(uint8_t *command);
-BOOL send_data(uint8_t *dataArray, uint16_t arraySize);
-//BOOL read_com_port();                 // old
-void close_com_port();
+BOOL close_com_port();
+BOOL CancelFunctiontIoEx();
 
-void read_data_array_com_port_Shum(uint8_t *answerMk, uint16_t dataSize);
+// Read/Send Functions
+BOOL ReadData(uint8_t *data, uint16_t dataSize, int time_data);
+BOOL SendData(uint8_t *data, uint16_t dataSize);
 
-
-BOOL read_data_array_com_port(uint8_t *answerMk, uint16_t dataSize);
-BOOL read_command_com_port(uint8_t *data, uint16_t dataSize);
-void CancelFunctiontIoEx();
+BOOL read_data_array_com_port_Shum(uint8_t *data, uint16_t dataSize);       // ”прощенна€ верси€ - работает дл€ чтени€ большого кол-во данных (возможно идеал ф-ции)
 
 
 

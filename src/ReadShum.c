@@ -20,22 +20,15 @@ void ReadShum()
     file = fopen("D:/Danya/Libary/C/newFileShum.bin", "wb");
 
     printf("Start\n");
-    if (!init_com_port(COM_PORT_9))
-    {
-        printf("Error Init Port\n");
+    if (!SetSettingsComPort(COM_PORT_9, CBR_9600))
         return;
-    }
-    if(!config_com_port(CBR_9600))
-    {
-        printf("Error Config Port\n");
-        return;
-    }
 
     printf("Start Work\n");
 
     while (1)
     {
-        read_data_array_com_port_Shum(dataBuff, SIZE_DATA_TO_PC);
+        if(!read_data_array_com_port_Shum(dataBuff, SIZE_DATA_TO_PC))
+            break;
 
         /*crc32 = CRC32(dataBuff, SIZE_DATA_TO_PC);
         if(!CheckCRC32(crc32, &dataBuff[SIZE_DATA_TO_PC]))

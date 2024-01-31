@@ -98,30 +98,19 @@ BOOL TransmitCommandControl(HANDLE hComm, uint32_t currentPlis)
 
     FormCommandDkDriverUpdate(command, currentPlis);
 
-    //else FormCommandDu(command, currentPlis, codeCommand);
-
     printf("Prepare To Send Data Command\n");
-    if(!send_command(command))
-    {
-        printf("Error send char Command 3\n");
+    if(!SendData(command, 14))
         return FALSE;
-    }
+
     /*for (i = 0; i < 14; i++)
         printf("\ncommand[%d] =  %x", i, command[i]);
     printf("\n");*/
-    printf("Command Send\n");
 
-    //CancelIoEx(hComm, NULL);
     //CancelFunctiontIoEx();
 
-    printf("Prepare To Read\n");
-    if(!read_command_com_port(commandAnswer, 14))
-    {
-        printf("Error read com port Command\n");
+    if(!ReadData(commandAnswer, 14, READ_TIME_COMMAND))
         return FALSE;
-    }
 
-    //CancelIoEx(hComm, NULL);
     //CancelFunctiontIoEx();
 
     if(!CheckAnswerCommand(commandAnswer, currentPlis, K_KVIT))
@@ -307,17 +296,13 @@ BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *an
     Sleep(80);
     //usleep(500000);
     //printf("Sleeped\n");
-    if(!send_data(dataArray, sizeToTransmit + 4))
-    {
-        printf("\nError send array\n");
+
+    if(!SendData(dataArray, sizeToTransmit + 4))
         return FALSE;
-    }
-    //printf("\n  Wait to read request\n");
-    if(!read_data_array_com_port(answerMk, 14))
-    {
-        printf("Error read com port\n");
+
+    if(!ReadData(answerMk, 14, READ_TIME_DATA))
         return FALSE;
-    }
+
     //printf("\n  2  No ERROR send array\n");
     if (!CheckAnswerCommand(answerMk, currentPlisAnswer, 0x91))
     {
@@ -347,12 +332,7 @@ void newMainFunc(void)
 
         CommandConsoleMaker(consoleCommand, command);
 
-        printf("\nTry to open port\n");
-        if(!init_com_port(COM_PORT_4))
-            return;
-
-        printf("Try to configurate port\n");
-        if(!config_com_port(CBR_115200))
+        if (!SetSettingsComPort(COM_PORT_4, CBR_115200))
             return;
 
         if (consoleCommand == 1 || consoleCommand == 2)
@@ -381,18 +361,13 @@ BOOL CommandLoadDuPoPlis()
         printf("%X ", command[i]);
     printf(" \n");
 
-    if(!send_data(command, 14))
-    {
-        printf("\nError send array\n");
+    if(!SendData(command, 14))
         return FALSE;
-    }
 
     printf("Prepare To Read\n");
-    if(!read_command_com_port(commandAnswer, 14))
-    {
-        printf("Error read com port Command\n");
+    if(!ReadData(commandAnswer, 14, READ_TIME_COMMAND))
         return FALSE;
-    }
+
     for (i = 0; i < 14; i++)
         printf("%X ", commandAnswer[i]);
     printf(" \n");
@@ -490,7 +465,7 @@ void CheckCommandControl(int consoleCommand)
 
 
 
-void testUartFunc(void)
+/*void testUartFunc(void)
 {
     int i;
     uint8_t consoleCommand = 0;
@@ -502,30 +477,9 @@ void testUartFunc(void)
         data[i] = 0xdc;
 
     printf("START\n");
-    //printf(" \n");
 
-    printf("Try to open port\n");
-    if(!init_com_port(COM_PORT_9))
+    if (!SetSettingsComPort(COM_PORT_9, CBR_9600))
         return;
-
-    printf("Try to configurate port\n");
-    if(!config_com_port(CBR_9600))
-        return;
-
-    /*consoleCommand2 = testCommand();
-
-    if(!send_command(data))
-    {
-        printf("Error send char Command 3\n");
-        return FALSE;
-    }
-    if(!read_data_array_com_port(dataAnswer))
-    {
-        printf("Error read com port\n");
-        return FALSE;
-    }
-    for (i = 0; i < 14; i++)
-        printf("[%d] = %d ", i, dataAnswer[i]);*/
 
     while(1)
     {
@@ -545,16 +499,14 @@ void testUartFunc(void)
                 data[i] = 0x55;
         }
         printf("Prepare Send data\n");
-        /*if (testCommand() == 2)
-            printf("WOWWWW\n");*/
-        //else if ()
-        if(!send_data(data, 14))
+
+        if(!SendData(data, 14))
         {
             printf("\nError send array\n");
             return FALSE;
         }
 
-        if(!read_data_array_com_port(dataAnswer, 14))
+        if(!ReadData(dataAnswer, 14, READ_TIME_DATA))
         {
             printf("Error read com port\n");
             return FALSE;
@@ -576,7 +528,7 @@ void testUartFunc(void)
     printf("Successfully Closed Port!\n");
 
     printf("END\n");
-}
+}*/
 
 
 
