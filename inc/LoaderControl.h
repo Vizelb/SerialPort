@@ -126,4 +126,8 @@ void CheckCommandControl(int consoleCommand);
 void testUartFunc(void);
 
 
+// Read Shum
+void ReadBufferShum();
+
+
 #endif // LOADER_CONTROL_H
