@@ -22,7 +22,7 @@ void CommandConsoleMaker(int consoleCommand, uint8_t *data)
 
 }
 
-void FormCommandLoadDuPoPlis(uint8_t *data)
+void FormCommandLoadDuPoPlis(uint8_t *command)
 {
     int i;
     uint32_t crc32;
@@ -48,7 +48,11 @@ void FormCommandLoadDuPoPlis(uint8_t *data)
         commandDu.command.bytes.Crc32[i] = crc32 >> (i*8);
 
     for (i = 0; i < 14; i++)
-        data[i] = commandDu.command.value[i];
+        command[i] = commandDu.command.value[i];
+
+    for (i = 0; i < 14; i++)
+        printf("%X ", command[i]);
+    printf(" \n");
 }
 
 

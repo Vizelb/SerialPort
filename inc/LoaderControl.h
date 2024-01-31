@@ -111,14 +111,15 @@ BOOL TransmitCommandControl(HANDLE hComm, uint32_t currentPlis);
 void FormCommandDu(uint8_t *command, uint32_t currentPlis, uint8_t codeCommand);    // Update
 // #2 Second function
 BOOL TransmitDataFile(uint32_t currentPlis);
-BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *answerMk);
+
 
 BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis);
-BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint32_t currentPlis, uint8_t codeCommand);
+BOOL CheckAnswerCommand(uint8_t *commandAnswer, /*uint32_t currentPlis,*/ uint8_t codeCommand);
 
 
 // New Structura
 void newMainFunc(void);
+BOOL OperatingModeController(int consoleCommand);
 BOOL CommandLoadDuPoPlis(); // Load PO PLIS
 void CheckCommandControl(int consoleCommand);
 

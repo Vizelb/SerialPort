@@ -47,18 +47,16 @@ int DuConsoleCommand(void)
     printf("Command - %X\n", command);
 
     if (command == 1)
-        CommandPoPlisDuUpdate();
+        FormCommandPoPlisDuUpdate();
     if (command == 2)
         CommandPoPlisDuProtocol();
     if (command == 3)
         commandPlis = ConsoleCommandDkDriverUpdate();
 
-    if (command == 9)
-        return command;
     return command;
 }
 
-void CommandPoPlisDuUpdate()
+void FormCommandPoPlisDuUpdate()
 {
     printf("\nInput currentBlock\n 1 - Block A;\n 2 - Block B;\n 3 - Block V;\n");
     scanf("%d", &currentBlockTemp);
@@ -67,7 +65,6 @@ void CommandPoPlisDuUpdate()
     printf("\nInput rpzuNumber - 1 or 2\n");
     scanf("%d", &rpzuNumber);
     printf("Command rpzuNumber - %X\n", rpzuNumber);
-
 
     printf("\nInput plisNumber - 1, 2, 3, 4\n");
     scanf("%d", &plisNumTemp);
@@ -110,7 +107,6 @@ void CommandPoPlisDuProtocol()
     printf("\nInput currentBlock\n 1 - Block A;\n 2 - Block B;\n 3 - Block V;\n");
     scanf("%d", &currentBlockTemp);
     currentBlock = currentBlockTemp;
-    //printf("Command currentBlock - %X\n", currentBlock);
     printf("\n");
     // DESCRIPTION
     if (currentBlock == 1 || currentBlock == 2) {
@@ -274,10 +270,8 @@ int ConsoleCommandDkDriverUpdate(void)
     printf("6 - download 3 driver for PLIS1 + PLIS2 + PLIS_CYCLONE \n");
     printf("7 - download 3 driver for PLIS1 + PLIS2 + PLIS3 + PLIS4 \n");
 
-    //char command = getchar();
     scanf("%d", &command);
     printf("Command - %X\n", command);
-    //if (command == '#')
     return command;
 }
 

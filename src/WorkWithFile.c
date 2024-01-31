@@ -32,82 +32,56 @@ extern struct CommandDu commandDu;  // CommandConsoleMaker.c
 //fopen(D:\Danya\Libary\C\test1, "r");  // открыть файл (имя, на чтение)
 //fopen(D:/Danya/Libary/C/test1, "r");  // открыть файл (имя, на чтение)
 
+// Используется для загрузки в ДК
 BOOL InitWorkWithFile(uint32_t currentPlis)
 {
-    int i;
-
     if (!OpenFileForPort(currentPlis))
         return FALSE;
     Sleep(1000);
     if (!ReadFromFile())
         return FALSE;
-
-    //GetFileSizeMy();
-
     fclose(file);     // закрытие файла
-
     printf("\n\n\n\n END OF WORK WRITE/READ FILE");
-    /*for(i = 0; i < bufferCounter; i++)
-        printf("%02x", buffer[i]);*/
-
     return TRUE;
 
 }
 
-BOOL InitWorkWithFileDuPoUpdate()
-{
-    int i;
 
-    if (!OpenFileForPortDuPoUpdate())
+BOOL WorkWithFileDuPoUpdate()
+{
+    if (!OpenFilePLISDuPoUpdate())
         return FALSE;
     Sleep(1000);
-    if(!ReadFromFile())
+    if (!ReadFromFile())
         return FALSE;
-
     fclose(file);     // закрытие файла
-
     printf("\n\n\n\n END OF WORK WRITE/READ FILE");
-
     return TRUE;
 
 }
 
-uint32_t GetFileSizeMy()
-{
-    fseek(file, 0, SEEK_END);
-    long fileSize = ftell(file);
-    rewind(file);
-    printf("\n%d\n", fileSize);
-    return fileSize;
-}
-
+// Ф-ция по чтению и отправки файла на com-port по 512 байт + 4 байта КС
 BOOL ReadFromFile()
 {
     int i, j;
     uint8_t stringSize;
     uint32_t sizeRead;
-
     uint32_t senderCounter = 0;
     uint32_t summaryFileRead = 0;
     uint32_t summaryFileReadInTotal = 0;
-    //uint32_t summaryFileTransmit = 0;
-    //char bufferTem[256];
-    //char buf = 0;
     uint32_t kolvoByte = 0;
     uint32_t numberFullCycle = 0;
     uint32_t numberOstatok = 0;
-
     int cheZaNumber = 0;
 
     kolvoByte = GetFileSizeMy();
     numberFullCycle = kolvoByte / 65535;
     numberOstatok = kolvoByte - (numberFullCycle * 65535) ;
 
-     printf("\n\nKolvo Byte = %d", kolvoByte);
-     printf("\nNumber Full Cycle = %d", numberFullCycle);
-     printf("\nNumber Ostatok = %d", numberOstatok);
+    printf("\n\nKolvo Byte = %d", kolvoByte);
+    printf("\nNumber Full Cycle = %d", numberFullCycle);
+    printf("\nNumber Ostatok = %d", numberOstatok);
 
-    //while (!feof(file))
     for(j = 0; j < numberFullCycle; j++)
     {
         summaryFileRead = 0;
@@ -117,51 +91,20 @@ BOOL ReadFromFile()
             sizeRead = fread(&bufferRead, sizeof(uint8_t), 512, file);
             summaryFileRead += sizeRead;
             summaryFileReadInTotal += sizeRead;
-            /*for(i = 0; i < sizeof(bufferRead); i++)
-            {
-                //printf("%x ", bufferRead[i]);   // d - print in hex
-                //bufferPlis[counterPlis] = bufferRead[i];
-                counterPlis++;
-            }*/
+
             printf("\nFile Size = %d, delitel = %d", GetFileSizeMy(), GetFileSizeMy() / 65535);
             printf("\nSumm of Transaction = %d, File Bytes Readed = %d", senderCounter+1, sizeRead);    // Кол-во посылок
             printf("\nSumm File Bytes = %d Dec, = %X Hex", summaryFileReadInTotal, summaryFileReadInTotal);
             printf("\nFile Size Ostatok = %d Dec, = %X Hex", kolvoByte - summaryFileReadInTotal, kolvoByte - summaryFileReadInTotal);
             if (!TransmitPartOfProshivka(bufferRead, sizeRead/*sizeof(bufferRead)*/, answerMk))
                 return FALSE;
-
             senderCounter++;
-            //summaryFileTransmit += sizeof(bufferRead);
 
-            //printf("\nSize of posilka = %d, and Summary File Transmit = %d", sizeof(bufferRead), summaryFileTransmit);
-            //printf("\nSumm of Transaction = %d, Current Addr = %x", senderCounter, counterPlis);
-            //printf("\nSumm File Bytes = %d, Skolko prochitali = %d , Addr Current Read = %x", summaryFileRead, sizeRead, summaryFileRead);
-            //printf("\nFile Size = , delitel/j = %d",  j);
-
-            /*printf("\nFile Size = %d, delitel = %d", GetFileSizeMy(), GetFileSizeMy() / 65535);
-            printf("\nSumm of Transaction = %d", senderCounter);    // Кол-во посылок
-            printf("\nFile Bytes Readed= %d", sizeRead);
-            printf("\nSumm File Bytes = %d", summaryFileRead);*/
-
-            /*if(counterPlis == 0xFFFF)
-            {
-
-            }*/
-        // #test format
-        //if(bufferRead[1] == 50)//0x32 )
-            //printf("\nTRUE\n");
-
-        //printf("\n%d\n", sizeRead);
             if(sizeRead < 512)
             {
                 printf("\n ERROR End of Reading");
                 return FALSE;
             }
-        /*if( feof (file) != 0)
-        {
-            printf("\nEnd of Reading");
-            return;
-        }*/
         }
     }
 
@@ -178,22 +121,7 @@ BOOL ReadFromFile()
             sizeRead = fread(&bufferRead, sizeof(uint8_t), 512, file);
             summaryFileRead += sizeRead;
             summaryFileReadInTotal += sizeRead;
-            /*for(i = 0; i < sizeof(bufferRead); i++)
-            {
-                //printf("%x ", bufferRead[i]);   // d - print in hex
-                //bufferPlis[counterPlis] = bufferRead[i];
-                counterPlis++;
-            }*/
-            /*if (sizeRead != 512)
-            {
-                printf("\nSkolko prochitali = %d ", sizeRead);
-                for(i = 0; i < sizeof(bufferRead); i++)
-                    printf("%x ", bufferRead[i]);   // d - print in hex
-            }*/
-            /*printf("\nFile Size = %d, delitel = %d", GetFileSizeMy(), GetFileSizeMy() / 65535);
-            printf("\nSumm of Transaction = %d", senderCounter+1);    // Кол-во посылок
-            printf("\nFile Bytes Readed= %d", sizeRead);
-            printf("\nSumm File Bytes = %d", summaryFileReadInTotal);*/
+
             printf("\nFile Size = %d, delitel = %d", GetFileSizeMy(), GetFileSizeMy() / 65535);
             printf("\nSumm of Transaction = %d, File Bytes Readed = %d", senderCounter+1, sizeRead);    // Кол-во посылок
             printf("\nSumm File Bytes = %d Dec, = %X Hex", summaryFileReadInTotal, summaryFileReadInTotal);
@@ -203,26 +131,7 @@ BOOL ReadFromFile()
                 printf("ERROR OSTATOK FILE!!");
                 return FALSE;
             }
-            /*if (sizeRead != 512)
-            {
-                for(i = 0; i < sizeof(bufferRead); i++)
-                    printf("%x ", bufferRead[i]);   // d - print in hex
-            }*/
-
-
             senderCounter++;
-            //summaryFileTransmit += sizeof(bufferRead);
-            //printf("\nSize of posilka = %d, and Summary File Transmit = %d", sizeof(bufferRead), summaryFileTransmit);
-            //printf("\nSumm of Transaction = %d, Current Addr = %x", senderCounter, counterPlis);
-            /*printf("\nNumber Ostatok = %d", numberOstatok);
-            printf("\nSumm File Bytes = %d, Skolko prochitali = %d ", summaryFileRead, sizeRead);
-            printf("\nFile Size = %d, delitel = %d", GetFileSizeMy(), GetFileSizeMy() / 65535);
-            printf("\nFile Size = , delitel/j = %d",  j);*/
-
-            /*printf("\nFile Size = %d, delitel = %d", GetFileSizeMy(), GetFileSizeMy() / 65535);
-            printf("\nSumm of Transaction = %d", senderCounter);    // Кол-во посылок
-            printf("\nFile Bytes Readed= %d", sizeRead);
-            printf("\nSumm File Bytes = %d", summaryFileRead);*/
 
             if(sizeRead < 512)
             {
@@ -236,85 +145,38 @@ BOOL ReadFromFile()
     return TRUE;
 }
 
-BOOL OpenFileForPort(uint32_t currentPlis)
+BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *answerMk)
 {
-    int sizefiletowrite;
-    //int fileSize;
-    //file = fopen("D:/Danya/Libary/C/test1.txt", "r");
-    //file = fopen(proshivkaPlis1, "rb");
+    int i;
+    uint32_t crc32;
 
+    printf("\nArray Size To Transmit = %d\n", arraySize + 4);
+    crc32 = CRC32(dataArray, arraySize);
+    for (i = 0; i < 4; i++)
+        dataArray[arraySize + i] = crc32 >> (i*8);
 
-    if (currentPlis == PLIS1)
-        file = fopen(proshivkaPlis1, "rb");
-    else if (currentPlis == PLIS2)
-        file = fopen(proshivkaPlis2, "rb");
-    else if (currentPlis == PLIS_CYCLONE)
-        file = fopen(proshivkaPlisCyclone, "rb");
-    else if (currentPlis == PLIS3)
-        file = fopen(proshivkaPlis3, "rb");
-    else if (currentPlis == PLIS4)
-        file = fopen(proshivkaPlis4, "rb");
+    for (i = 0; i < arraySize+4; i++)
+        printf("[%3.d] = %2.x  ", i, dataArray[i]);
+    printf("\n");
 
-    else if (currentPlis == ALL_SET1)
+    Sleep(80);
+
+    if(!SendData(dataArray, arraySize + 4))
+        return FALSE;
+
+    if(!ReadData(answerMk, 14, READ_TIME_DATA))
+        return FALSE;
+
+    if (!CheckAnswerCommand(answerMk, /*currentPlisAnswer,*/ 0x91))
     {
-        printf("\nSwitcher Plis = %d\n", switcherPlis);
-        if (switcherPlis == 0)
-        {
-            file = fopen(proshivkaPlis1, "rb");
-            switcherPlis = 1;
-            return TRUE;
-        }
-        if (switcherPlis == 1)
-        {
-            file = fopen(proshivkaPlis2, "rb");
-            switcherPlis = 2;
-            return TRUE;
-        }
-        if (switcherPlis == 2)
-        {
-            file = fopen(proshivkaPlisCyclone, "rb");
-            switcherPlis = 3;
-            return TRUE;
-        }
-    }
-
-    else if (currentPlis == ALL_SET2)
-    {
-        if (switcherPlis == 0)
-        {
-            file = fopen(proshivkaPlis1, "rb");
-            switcherPlis = 1;
-            return TRUE;
-        }
-        if (switcherPlis == 1)
-        {
-            file = fopen(proshivkaPlis2, "rb");
-            switcherPlis = 2;
-            return TRUE;
-        }
-        if (switcherPlis == 2)
-        {
-            file = fopen(proshivkaPlis3, "rb");
-            switcherPlis = 3;
-            return TRUE;
-        }
-        if (switcherPlis == 3)
-        {
-            file = fopen(proshivkaPlis3, "rb");
-            switcherPlis = 4;
-            return TRUE;
-        }
-    }
-
-    if (file == NULL)
-    {
-        printf("Error Open File");
-        return TRUE;
+        printf("Error read com port DATA - check bytes\n");
+        return FALSE;
     }
     return TRUE;
 }
 
-BOOL OpenFileForPortDuPoUpdate()
+// Ф-ция для открытия файла прошивки ПЛИС
+BOOL OpenFilePLISDuPoUpdate()
 {
     printf("\n");
     printf("numRPZU = %d\n", commandDu.command.bytes.third_byte.bits.NumRPZU);
@@ -390,89 +252,90 @@ BOOL OpenFileForPortDuPoUpdate()
     return TRUE;
 }
 
-
-
-
-
-void CloseFileForPort()
+BOOL OpenFileForPort(uint32_t currentPlis)
 {
-
-}
-
-
-
-/*int ascii_to_hex(char c)
-{
-    int num = (int) c;
-    if (num < 58 && num > 47)
+    //file = fopen("D:/Danya/Libary/C/test1.txt", "r");
+    if (currentPlis == PLIS1)
+        file = fopen(proshivkaPlis1, "rb");
+    else if (currentPlis == PLIS2)
+        file = fopen(proshivkaPlis2, "rb");
+    else if (currentPlis == PLIS_CYCLONE)
+        file = fopen(proshivkaPlisCyclone, "rb");
+    else if (currentPlis == PLIS3)
+        file = fopen(proshivkaPlis3, "rb");
+    else if (currentPlis == PLIS4)
+        file = fopen(proshivkaPlis4, "rb");
+    else if (currentPlis == ALL_SET1)
     {
-        return num - 48;
+        printf("\nSwitcher Plis = %d\n", switcherPlis);
+        if (switcherPlis == 0)
+        {
+            file = fopen(proshivkaPlis1, "rb");
+            switcherPlis = 1;
+            return TRUE;
+        }
+        if (switcherPlis == 1)
+        {
+            file = fopen(proshivkaPlis2, "rb");
+            switcherPlis = 2;
+            return TRUE;
+        }
+        if (switcherPlis == 2)
+        {
+            file = fopen(proshivkaPlisCyclone, "rb");
+            switcherPlis = 3;
+            return TRUE;
+        }
     }
-    if (num < 103 && num > 96)
+
+    else if (currentPlis == ALL_SET2)
     {
-        return num - 87;
+        if (switcherPlis == 0)
+        {
+            file = fopen(proshivkaPlis1, "rb");
+            switcherPlis = 1;
+            return TRUE;
+        }
+        if (switcherPlis == 1)
+        {
+            file = fopen(proshivkaPlis2, "rb");
+            switcherPlis = 2;
+            return TRUE;
+        }
+        if (switcherPlis == 2)
+        {
+            file = fopen(proshivkaPlis3, "rb");
+            switcherPlis = 3;
+            return TRUE;
+        }
+        if (switcherPlis == 3)
+        {
+            file = fopen(proshivkaPlis3, "rb");
+            switcherPlis = 4;
+            return TRUE;
+        }
     }
-    return num;
+
+    if (file == NULL)
+    {
+        printf("Error Open File");
+        return FALSE;
+    }
+    return TRUE;
 }
 
 
-int hex_to_int(char c)
+uint32_t GetFileSizeMy()
 {
-    int first = c / 16 -3;
-    int second = c % 16;
-    int result = first * 10 + second;
-    if (result > 9)
-        result--;
-    return result;
-}
-
-int hex_to_ascii(char c, char d)
-{
-    int high = hex_to_int(c) * 16;
-    int low = hex_to_int(d);
-    return high + low;
-}
-
-int hexChrBin(const char hex, char *out)
-{
-    if(out == NULL)
-        return 0;
-
-    if (hex >= '0' && hex <= '9')
-        *out = hex - '0';
-    else if (hex >= 'A' && hex <= 'F')
-        *out = hex - 'A' + 10;
-    else if (hex >= 'a' && hex <= 'f')
-        *out = hex - 'a' + 10;
-    else return 0;
-
-    return 1;
-
-}
-
-void to_hex_16(char *output, unsigned n)
-{
-    static const char hex_digit[] = "0123456789abcdef";
-
-
-
-    output[0] = hex_digit[(n >> 12) & 0xf];
-    output[1] = hex_digit[(n >> 8) & 0xf];
-    output[2] = hex_digit[(n >> 4) & 0xf];
-    output[3] = hex_digit[n & 0xf];
-    output[4] = '\0';
+    fseek(file, 0, SEEK_END);
+    long fileSize = ftell(file);
+    rewind(file);
+    printf("\n%d\n", fileSize);
+    return fileSize;
 }
 
 
 
-void StringParse()
-{
-    // 1 byte   - size
-    // 2-3      - addr
-    // 4        - service
-    // 5 - size - data
-    // 5 + size - ks
-    // summ = 5 + size
-}
-*/
+
+
 

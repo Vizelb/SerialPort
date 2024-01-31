@@ -4,7 +4,7 @@
 #include "inttypes.h"
 
 void CommandConsoleMaker(int consoleCommand, uint8_t *data);
-void FormCommandLoadDuPoPlis(uint8_t *data);
+void FormCommandLoadDuPoPlis(uint8_t *command);
 
 // Dk driver Update
 void FormCommandDkDriverUpdate(uint8_t *command, uint32_t currentPlis);

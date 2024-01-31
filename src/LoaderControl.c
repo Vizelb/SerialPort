@@ -12,12 +12,9 @@
 #include <termios.h>
 #include <unistd.h>
 #include <string.h>
-
 #include <inttypes.h>
-
 #include <winbase.h>
 #include <windows.h>
-
 #include <stdbool.h>*/
 
 
@@ -44,10 +41,75 @@ int switcherPlis = 0;
 
 uint32_t commandPlis;
 
+// Главная ф-ция программы
+void newMainFunc(void)
+{
+    int i;
+    int consoleCommand;
+
+    printf("START\n");
+    while(1)
+    {
+        consoleCommand = DuConsoleCommand();
+        if (consoleCommand == 9)
+            break;
+
+        //CommandConsoleMaker(consoleCommand, command);
+
+        /*if (!SetSettingsComPort(COM_PORT_4, CBR_115200))
+            return;
+        if (consoleCommand == 1 || consoleCommand == 2)
+            CommandLoadDuPoPlis();
+        if (consoleCommand == 3)
+            InitLoaderControl();
+        close_com_port();*/
+        if (!OperatingModeController(consoleCommand)) {
+            printf("\nWork Error!\n");
+            break;
+        }
+    }
+    printf("END\n");
+}
+
+BOOL OperatingModeController(int consoleCommand)
+{
+    if (consoleCommand == 1 || consoleCommand == 2)
+        return CommandLoadDuPoPlis();
+    if (consoleCommand == 3)
+        InitLoaderControl();
+}
+
+// Загрузка ПО ПЛИС по протоколу ДУ
+BOOL CommandLoadDuPoPlis()
+{
+    int i;
+    uint8_t command[14];
+    uint8_t commandAnswer[14];
+
+    FormCommandLoadDuPoPlis(command);
+
+    if(!SendData(command, 14))
+        return FALSE;
+
+    if(!ReadData(commandAnswer, 14, READ_TIME_COMMAND))
+        return FALSE;
+    // Контроль ответа?? - КС, ...
+
+    printf("Start Loading File \n");
+    if (!WorkWithFileDuPoUpdate())
+        return FALSE;
+
+    return TRUE;
+}
+
+
+// Загрузчик ПО ПЛИС в ДК
 void InitLoaderControl()
 {
     int i, j;
     uint32_t currentPlis;
+    //uint8_t command[14];
+    //uint8_t commandAnswer[14];
     //uint32_t commandPlis;
 
     BREAK_LINE();
@@ -113,7 +175,7 @@ BOOL TransmitCommandControl(HANDLE hComm, uint32_t currentPlis)
 
     //CancelFunctiontIoEx();
 
-    if(!CheckAnswerCommand(commandAnswer, currentPlis, K_KVIT))
+    if(!CheckAnswerCommand(commandAnswer, /*currentPlis,*/ K_KVIT))
     {
         printf("Error Control Command\n");
         return FALSE;
@@ -237,7 +299,7 @@ BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis)
     return FALSE;
 }
 
-BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint32_t currentPlis, uint8_t codeCommand)
+BOOL CheckAnswerCommand(uint8_t *commandAnswer, /*uint32_t currentPlis,*/ uint8_t codeCommand)
 {
     int i;
     uint32_t crc32;
@@ -264,119 +326,6 @@ BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint32_t currentPlis, uint8_t co
     return TRUE;
 }
 
-
-BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *answerMk)
-{
-    int i;
-    uint32_t crc32;
-    uint16_t sizeToTransmit = arraySize;
-
-    /*if (arraySize != 512)
-    {
-        for (i = arraySize; i < 512; i++)
-            dataArray[i] = 0x00;
-    }*/
-
-    /*for (i = 0; i < 516; i++)
-        printf("\ncommand[%d] =  %x", i, dataArray[i]);
-    printf("\n");*/
-
-    printf("\nArray Size = %d", arraySize);
-    printf("\nArray Size To Transmit = %d", sizeToTransmit + 4);
-    crc32 = CRC32(dataArray, sizeToTransmit);
-    for (i = 0; i < 4; i++)
-        dataArray[sizeToTransmit + i] = crc32 >> (i*8);
-
-    printf("\n");
-    for (i = 0; i < sizeToTransmit+4; i++)
-        printf("[%3.d] = %2.x  ", i, dataArray[i]);
-    printf("\n");
-    //printf("Sleep for 0.080 sec\n");
-    //sleep(1);
-    Sleep(80);
-    //usleep(500000);
-    //printf("Sleeped\n");
-
-    if(!SendData(dataArray, sizeToTransmit + 4))
-        return FALSE;
-
-    if(!ReadData(answerMk, 14, READ_TIME_DATA))
-        return FALSE;
-
-    //printf("\n  2  No ERROR send array\n");
-    if (!CheckAnswerCommand(answerMk, currentPlisAnswer, 0x91))
-    {
-        printf("Error read com port DATA - check bytes\n");
-        return FALSE;
-    }
-    //printf("\n 3  No ERROR send array\n");
-    return TRUE;
-}
-
-
-
-
-void newMainFunc(void)
-{
-    int i;
-    int consoleCommand;
-    //uint8_t data[14];
-
-    printf("START\n");
-    while(1)
-    {
-        consoleCommand = DuConsoleCommand();
-
-        if (consoleCommand == 9)
-            break;
-
-        CommandConsoleMaker(consoleCommand, command);
-
-        if (!SetSettingsComPort(COM_PORT_4, CBR_115200))
-            return;
-
-        if (consoleCommand == 1 || consoleCommand == 2)
-            CommandLoadDuPoPlis();
-        if (consoleCommand == 3)
-            InitLoaderControl();
-
-        printf("Prepare To Close Port\n");
-        close_com_port();
-        printf("Successfully Closed Port!\n");
-
-    }
-
-
-
-    printf("END\n");
-}
-
-BOOL CommandLoadDuPoPlis()
-{
-    int i;
-
-    //CommandPoPlisDuUpdate();
-
-    for (i = 0; i < 14; i++)
-        printf("%X ", command[i]);
-    printf(" \n");
-
-    if(!SendData(command, 14))
-        return FALSE;
-
-    printf("Prepare To Read\n");
-    if(!ReadData(commandAnswer, 14, READ_TIME_COMMAND))
-        return FALSE;
-
-    for (i = 0; i < 14; i++)
-        printf("%X ", commandAnswer[i]);
-    printf(" \n");
-
-    printf("Start Loading File \n");
-    if (!InitWorkWithFileDuPoUpdate())
-        return FALSE;
-    return TRUE;
-}
 
 void CheckCommandControl(int consoleCommand)
 {

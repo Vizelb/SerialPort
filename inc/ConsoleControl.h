@@ -9,7 +9,7 @@
 void InitConsoleControl();
 
 int DuConsoleCommand(void);
-void CommandPoPlisDuUpdate();               // 1
+void FormCommandPoPlisDuUpdate();           // 1
 void CommandPoPlisDuProtocol();             // 2
 int ConsoleCommandDkDriverUpdate(void);     // 3
 
