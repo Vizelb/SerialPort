@@ -12,8 +12,8 @@
 
 FILE *file;
 
-char proshivkaPlis1[] =         "D:/Danya/Libary/C/MM935_1_1_noise.rbf";
-char proshivkaPlis2[] =         "D:/Danya/Libary/C/MM935_2_1_noise.rbf";
+char proshivkaPlis1[] =         "D:/Danya/Libary/C/935_1_2.rbf";
+char proshivkaPlis2[] =         "D:/Danya/Libary/C/935_2_2.rbf";
 char proshivkaPlisCyclone[] =   "D:/Danya/Libary/C/TEST_BA435_PSC.rbf";
 char proshivkaPlis3[] =         "D:/Danya/Libary/C/TEST_REKURRENTA_5576.rbf";
 char proshivkaPlis4[] =         "D:/Danya/Libary/C/TEST_REKURRENTA_5576.rbf";
@@ -161,17 +161,9 @@ BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *an
 
     Sleep(80);
 
-    if(!SendData(dataArray, arraySize + 4))
+    if (!TxRx_DataControl(dataArray, arraySize + 4, READ_TIME_DATA))
         return FALSE;
 
-    if(!ReadData(answerMk, 14, READ_TIME_DATA))
-        return FALSE;
-
-    if (!CheckAnswerCommand(answerMk, /*currentPlisAnswer,*/ 0x91))
-    {
-        printf("Error read com port DATA - check bytes\n");
-        return FALSE;
-    }
     return TRUE;
 }
 

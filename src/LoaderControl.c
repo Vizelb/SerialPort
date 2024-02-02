@@ -3,6 +3,7 @@
 #include "../inc/WorkWithFile.h"
 #include "../inc/ConsoleControl.h"
 #include "../inc/CommandConsoleMaker.h"
+#include "../inc/DkWork.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,20 +29,10 @@ uint8_t currentBlock;
 #define BREAK_LINE()    printf("//////// ////////\n\n")
 extern HANDLE hComm;
 
-uint32_t currentPlisAnswer = 0;
+//uint8_t command[14];
+//uint8_t commandAnswer[14];
 
-uint32_t sizeFilePlis;
-uint32_t addrFilePlisInDk;
-//uint32_t sizeFilePlisInDk;
-
-uint8_t command[14];
-uint8_t commandAnswer[14];
-
-int switcherPlis = 0;
-
-uint32_t commandPlis;
-
-// –ì–ª–∞–≤–Ω–∞—è —Ñ-—Ü–∏—è –ø—Ä–æ–≥—Ä–∞–º–º—ã
+// √Î‡‚Ì‡ˇ Ù-ˆËˇ ÔÓ„‡ÏÏ˚
 void newMainFunc(void)
 {
     int i;
@@ -54,48 +45,40 @@ void newMainFunc(void)
         if (consoleCommand == 9)
             break;
 
-        //CommandConsoleMaker(consoleCommand, command);
-
-        /*if (!SetSettingsComPort(COM_PORT_4, CBR_115200))
-            return;
-        if (consoleCommand == 1 || consoleCommand == 2)
-            CommandLoadDuPoPlis();
-        if (consoleCommand == 3)
-            InitLoaderControl();
-        close_com_port();*/
         if (!OperatingModeController(consoleCommand)) {
             printf("\nWork Error!\n");
             break;
         }
+        close_com_port();
     }
+    close_com_port();
     printf("END\n");
 }
 
 BOOL OperatingModeController(int consoleCommand)
 {
+    printf("Start Work\n");
+
     if (consoleCommand == 1 || consoleCommand == 2)
-        return CommandLoadDuPoPlis();
+        return LoadByDuPoPlisFirmware();
     if (consoleCommand == 3)
-        InitLoaderControl();
+        return LoadInDkPlisFirmware();
 }
 
-// –ó–∞–≥—Ä—É–∑–∫–∞ –ü–û –ü–õ–ò–° –ø–æ –ø—Ä–æ—Ç–æ–∫–æ–ª—É –î–£
-BOOL CommandLoadDuPoPlis()
+// «‡„ÛÁÍ‡ œŒ œÀ»— ÔÓ ÔÓÚÓÍÓÎÛ ƒ”
+BOOL LoadByDuPoPlisFirmware()
 {
     int i;
     uint8_t command[14];
-    uint8_t commandAnswer[14];
+
+    if (!SetSettingsComPort(COM_PORT_4, CBR_115200))
+            return FALSE;
 
     FormCommandLoadDuPoPlis(command);
 
-    if(!SendData(command, 14))
+    if (!TxRx_DataControl(command, 14, READ_TIME_COMMAND))
         return FALSE;
 
-    if(!ReadData(commandAnswer, 14, READ_TIME_COMMAND))
-        return FALSE;
-    // –ö–æ–Ω—Ç—Ä–æ–ª—å –æ—Ç–≤–µ—Ç–∞?? - –ö–°, ...
-
-    printf("Start Loading File \n");
     if (!WorkWithFileDuPoUpdate())
         return FALSE;
 
@@ -103,113 +86,54 @@ BOOL CommandLoadDuPoPlis()
 }
 
 
-// –ó–∞–≥—Ä—É–∑—á–∏–∫ –ü–û –ü–õ–ò–° –≤ –î–ö
-void InitLoaderControl()
+
+
+BOOL TxRx_DataControl(uint8_t *command, uint32_t commandSize, int time_out)
 {
-    int i, j;
-    uint32_t currentPlis;
-    //uint8_t command[14];
-    //uint8_t commandAnswer[14];
-    //uint32_t commandPlis;
+    uint8_t commandAnswer[14];
 
-    BREAK_LINE();
-
-    // #3
-    printf("Start Work\n");
-    //commandPlis = ConsoleCommandDkDriverUpdate();
-    if(CheckCurrentPlis(commandPlis, &currentPlis))
-    {
-        if (!StartLoadingFile(hComm, currentPlis))
-        {
-            printf("Che za error?");
-            return;
-        }
-    }
-    else printf("ERROR COMMAND");
-
-}
-
-
-BOOL StartLoadingFile(HANDLE hComm, uint32_t currentPlis)
-{
-    if (!TransmitCommandControl(hComm, currentPlis))
-    {
-        printf("\nERROR WORK CYCLE\n");
+    if(!SendData(command, commandSize))
         return FALSE;
-    }
-
-    currentPlisAnswer = currentPlis;    // √è√´√Æ√µ√Æ√© √ä√Æ√±√≤√ª√´√º
-    if (!TransmitDataFile(currentPlis))
-    {
-        printf("\nERROR WORK FILE\n");
+    if(!ReadData(commandAnswer, 14, time_out))
         return FALSE;
-    }
-
-    /*if (!TransmitCommandControl(hComm, currentPlis, K_K_END))
-    {
-        printf("\nERROR WORK CYCLE\n");
+    if(!CheckAnswerCommand(commandAnswer, K_KVIT))
         return FALSE;
-    }*/
-
     return TRUE;
 }
 
-BOOL TransmitCommandControl(HANDLE hComm, uint32_t currentPlis)
+BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint8_t codeCommand)
 {
     int i;
+    uint32_t crc32;
+    struct AnswerFromMk headAnswer;
 
-    FormCommandDkDriverUpdate(command, currentPlis);
+    for (i = 0; i < 14; i++)
+        headAnswer.answer.value[i] = commandAnswer[i];
 
-    printf("Prepare To Send Data Command\n");
-    if(!SendData(command, 14))
-        return FALSE;
-
-    /*for (i = 0; i < 14; i++)
-        printf("\ncommand[%d] =  %x", i, command[i]);
-    printf("\n");*/
-
-    //CancelFunctiontIoEx();
-
-    if(!ReadData(commandAnswer, 14, READ_TIME_COMMAND))
-        return FALSE;
-
-    //CancelFunctiontIoEx();
-
-    if(!CheckAnswerCommand(commandAnswer, /*currentPlis,*/ K_KVIT))
+    if (headAnswer.answer.bytes.code != codeCommand)
     {
-        printf("Error Control Command\n");
+        printf("error#1: code command answer\n");
+        return FALSE;
+    }
+    for (i = 0; i < 7; i++)
+        if (headAnswer.answer.bytes.emptyBytes[i] != 0x00){
+            printf("error#2: empty bytes answer\n");
+            return FALSE;
+        }
+    crc32 = CRC32(headAnswer.answer.value, 10);
+    if(!CheckCRC32(crc32, headAnswer.answer.bytes.Crc32)){
+        printf("error#3: CRC32 answer\n");
         return FALSE;
     }
     return TRUE;
 }
 
-BOOL TransmitDataFile(uint32_t currentPlis)
-{
-    if (currentPlis == ALL_SET1)
-    {
-        while (switcherPlis != 3)
-        {
-            //printf("First cyrcle error - out");
-            if (!InitWorkWithFile(currentPlis))
-            {
-                printf("First cyrcle error");
-                return FALSE;
-            }
-        }
-    }
-    else if (currentPlis == ALL_SET2)
-    {
-        while (switcherPlis != 4)
-        {
-            if (!InitWorkWithFile(currentPlis))
-                return FALSE;
-        }
-    }
-    else if (!InitWorkWithFile(currentPlis))
-        return FALSE;
 
-    return TRUE;
-}
+
+
+
+
+
 
 
 
@@ -238,98 +162,12 @@ BOOL TransmitDataFile(uint32_t currentPlis)
         command[i] = duCommand.command.value[i];
 }*/
 
-BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis)
-{
-    if (command == 1)
-    {
-        *currentPlis = PLIS1;
-        addrFilePlisInDk = 0;
-        sizeFilePlis = SIZE_PLIS_RUSSIAN;
-        //printf("\ncurrent PLIS = %d\n", *currentPlis);
 
 
-        return TRUE;
-    }
-    if (command == 2)
-    {
-        *currentPlis = PLIS2;
-        addrFilePlisInDk = SIZE_PLIS_RUSSIAN;
-        sizeFilePlis = SIZE_PLIS_RUSSIAN;
-        //printf("current PLIS = %d", *currentPlis);
-        return TRUE;
-    }
-    if (command == 3)
-    {
-        *currentPlis = PLIS_CYCLONE;
-        addrFilePlisInDk = SIZE_PLIS_RUSSIAN * 2;
-        sizeFilePlis = SIZE_PLIS_CYCLONE;
-        return TRUE;
-    }
-    if (command == 4)
-    {
-        *currentPlis = PLIS3;
-        addrFilePlisInDk = SIZE_PLIS_RUSSIAN * 2;
-        sizeFilePlis = SIZE_PLIS_RUSSIAN;
-        return TRUE;
-    }
-    if (command == 5)
-    {
-        *currentPlis = PLIS4;
-        addrFilePlisInDk = SIZE_PLIS_RUSSIAN * 2 + SIZE_PLIS_RUSSIAN;
-        sizeFilePlis = SIZE_PLIS_RUSSIAN;
-        return TRUE;
-    }
 
-    if (command == 6)   // √Ñ√ã√ü √Ç√ë√Ö√ï √Ç√é√á√å√é√Ü√ç√õ√ï √è√ã√à√ë √Ñ√ã√ü √Ñ√ä
-    {
-        *currentPlis = ALL_SET1;
-        addrFilePlisInDk = 0;
-        sizeFilePlis = SIZE_PLIS_RUSSIAN;
-        return TRUE;
-    }
-    if (command == 7)   // √Ñ√ã√ü √Ç√ë√Ö√ï √Ç√é√á√å√é√Ü√ç√õ√ï √è√ã√à√ë √Ñ√ã√ü √Ñ√ä
-    {
-        *currentPlis = ALL_SET2;
-        addrFilePlisInDk = 0;
-        sizeFilePlis = SIZE_PLIS_RUSSIAN;
-        return TRUE;
-    }
-
-    printf("error current PLIS");
-    return FALSE;
-}
-
-BOOL CheckAnswerCommand(uint8_t *commandAnswer, /*uint32_t currentPlis,*/ uint8_t codeCommand)
-{
-    int i;
-    uint32_t crc32;
-    struct AnswerFromMk headAnswer;
-
-    for (i = 0; i < 14; i++)
-        headAnswer.answer.value[i] = commandAnswer[i];
-
-    if (headAnswer.answer.bytes.code != codeCommand)
-        return FALSE;
-    /*if (headAnswer.answer.bytes.plisNumber != currentPlis)
-        return FALSE;*/
-    for (i = 0; i < 7; i++)
-        if (headAnswer.answer.bytes.emptyBytes[i] != 0x00){
-            printf("error 3");
-            return FALSE;
-        }
-    crc32 = CRC32(headAnswer.answer.value, 10);
-    if(!CheckCRC32(crc32, headAnswer.answer.bytes.Crc32)){
-        printf("error 4");
-        return FALSE;
-    }
-
-    return TRUE;
-}
-
-
+/*
 void CheckCommandControl(int consoleCommand)
 {
-
     uint32_t currentCommand;
 
     if ((consoleCommand >> 8) == 1)         // 16-31
@@ -344,25 +182,25 @@ void CheckCommandControl(int consoleCommand)
 
     if (currentBlock == 1)
     {
-        if (currentCommand == 0)        // –†–°
+        if (currentCommand == 0)        // –—
         {
             rpzuNumber = 0;
-            //plisNumber = 0;         // –ü–õ–ò–° 1 –∏–ª–∏ 2
-            plisType = 0;           // –û—Ç–µ—á–∫–∞
+            //plisNumber = 0;         // œÀ»— 1 ËÎË 2
+            plisType = 0;           // ŒÚÂ˜Í‡
             rpzuFileNumber = 0;
         }
-        if (currentCommand == 1)        // –®–°
+        if (currentCommand == 1)        // ÿ—
         {
             rpzuNumber = 0;
-            //plisNumber = 1;         // –ü–õ–ò–° 1 –∏–ª–∏ 2
-            plisType = 0;           // –û—Ç–µ—á–∫–∞
+            //plisNumber = 1;         // œÀ»— 1 ËÎË 2
+            plisType = 0;           // ŒÚÂ˜Í‡
             rpzuFileNumber = 1;
         }
-        if (currentCommand == 2)        // –ò–Ω—Ç–µ—Ä—Ñ–µ–π—Å –ê –∏ –ë - –¶–∏–∫–ª–æ–Ω
+        if (currentCommand == 2)        // »ÌÚÂÙÂÈÒ ¿ Ë ¡ - ÷ËÍÎÓÌ
         {
             rpzuNumber = 0;
-            //plisNumber = 2;         // –ü–õ–ò–° 2
-            plisType = 1;           // –¶–∏–∫–ª–æ–Ω
+            //plisNumber = 2;         // œÀ»— 2
+            plisType = 1;           // ÷ËÍÎÓÌ
             rpzuFileNumber = 2;
         }
         else return;
@@ -373,37 +211,37 @@ void CheckCommandControl(int consoleCommand)
     }
     if (currentBlock == 3)
     {
-        if (currentCommand == 0)        // –†–°–ò
+        if (currentCommand == 0)        // –—»
         {
             rpzuNumber = 0;
-            //plisNumber = 0;         // –ü–õ–ò–° 1 –∏–ª–∏ 2
-            plisType = 0;           // –û—Ç–µ—á–∫–∞
+            //plisNumber = 0;         // œÀ»— 1 ËÎË 2
+            plisType = 0;           // ŒÚÂ˜Í‡
             rpzuFileNumber = 0;
         }
-        if (currentCommand == 1)        // –®–°–ò
+        if (currentCommand == 1)        // ÿ—»
         {
             rpzuNumber = 0;
-            //plisNumber = 1;         // –ü–õ–ò–° 1 –∏–ª–∏ 2
-            plisType = 0;           // –û—Ç–µ—á–∫–∞
+            //plisNumber = 1;         // œÀ»— 1 ËÎË 2
+            plisType = 0;           // ŒÚÂ˜Í‡
             rpzuFileNumber = 1;
         }
-        if (currentCommand == 2)        // –ò–Ω—Ç–µ—Ä—Ñ–µ–π—Å –ê –∏ –ë - –¶–∏–∫–ª–æ–Ω
+        if (currentCommand == 2)        // »ÌÚÂÙÂÈÒ ¿ Ë ¡ - ÷ËÍÎÓÌ
         {
             rpzuNumber = 0;
-            //plisNumber = 2;         // –ü–õ–ò–° 1 –∏–ª–∏ 2
-            plisType = 0;           // –û—Ç–µ—á–∫–∞
+            //plisNumber = 2;         // œÀ»— 1 ËÎË 2
+            plisType = 0;           // ŒÚÂ˜Í‡
             rpzuFileNumber = 2;
         }
-        if (currentCommand == 3)        // –ò–Ω—Ç–µ—Ä—Ñ–µ–π—Å –ê –∏ –ë - –¶–∏–∫–ª–æ–Ω
+        if (currentCommand == 3)        // »ÌÚÂÙÂÈÒ ¿ Ë ¡ - ÷ËÍÎÓÌ
         {
             rpzuNumber = 0;
-            //plisNumber = 3;         // –ü–õ–ò–° 1 –∏–ª–∏ 2
-            plisType = 0;           // –û—Ç–µ—á–∫–∞
+            //plisNumber = 3;         // œÀ»— 1 ËÎË 2
+            plisType = 0;           // ŒÚÂ˜Í‡
             rpzuFileNumber = 2;
         }
     }
 
-}
+}*/
 
 
 

@@ -18,6 +18,8 @@ void CommandConsoleMaker(int consoleCommand, uint8_t *data)
         FormCommandLoadDuPoPlis(data);
     if (consoleCommand == 2)
         FormCommandLoadDuPoPlis(data);
+    /*if (consoleCommand == 3)
+        FormCommandDkDriverUpdate(data);*/
     else return;
 
 }

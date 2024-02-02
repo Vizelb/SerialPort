@@ -103,25 +103,16 @@ typedef struct AnswerFromMk
 #define SIZE_PLIS_CYCLONE           ((uint32_t) 0x59D8B)
 
 //  main
-void InitLoaderControl();
-//
-BOOL StartLoadingFile(HANDLE hComm, uint32_t currentPlis);
-// #1 First function - KKU to init process
-BOOL TransmitCommandControl(HANDLE hComm, uint32_t currentPlis);
-void FormCommandDu(uint8_t *command, uint32_t currentPlis, uint8_t codeCommand);    // Update
-// #2 Second function
-BOOL TransmitDataFile(uint32_t currentPlis);
-
-
-BOOL CheckCurrentPlis(uint32_t command, uint32_t *currentPlis);
-BOOL CheckAnswerCommand(uint8_t *commandAnswer, /*uint32_t currentPlis,*/ uint8_t codeCommand);
-
-
-// New Structura
 void newMainFunc(void);
 BOOL OperatingModeController(int consoleCommand);
-BOOL CommandLoadDuPoPlis(); // Load PO PLIS
-void CheckCommandControl(int consoleCommand);
+BOOL LoadByDuPoPlisFirmware();
+BOOL TxRx_DataControl(uint8_t *command, uint32_t commandSize, int time_out);
+BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint8_t codeCommand);
+
+
+
+
+//void CheckCommandControl(int consoleCommand);
 
 // Testes
 //void testUartFunc(void);
