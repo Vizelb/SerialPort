@@ -112,56 +112,56 @@ void CommandPoPlisDuProtocol()
     // DESCRIPTION
     if (currentBlock == 1 || currentBlock == 2) {
         printf("1. PC - block A, B\n");
-        printf("Description: nCE_EPROM_1, File in RPZU = 0, type of PLIS = 0, ¹ PLIS = 0\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 0, type of PLIS = 0, Number PLIS = 0\n");
 
         printf("2. LLIC - block A, B\n");
-        printf("Description: nCE_EPROM_1, File in RPZU = 1, type of PLIS = 0, ¹ PLIS = 1\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 1, type of PLIS = 0, Number PLIS = 1\n");
 
         printf("3. PPC - block A, B\n");
-        printf("Description: nCE_EPROM_1, File in RPZU = 2, type of PLIS = 0, ¹ PLIS = 0\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 2, type of PLIS = 0, Number PLIS = 0\n");
 
         printf("4. PLLIC - block A, B\n");
-        printf("Description: nCE_EPROM_1, File in RPZU = 3, type of PLIS = 0, ¹ PLIS = 1\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 3, type of PLIS = 0, Number PLIS = 1\n");
     }
 
     if (currentBlock == 3) {
         printf("5. PCU - block V\n");
-        printf("Description: nCE_EPROM_1, File in RPZU = 0, type of PLIS = 0, ¹ PLIS = 0\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 0, type of PLIS = 0, Number PLIS = 0\n");
 
         printf("6. LLICU - block V\n");
-        printf("Description: nCE_EPROM_1, File in RPZU = 1, type of PLIS = 0, ¹ PLIS = 1\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 1, type of PLIS = 0, Number PLIS = 1\n");
     }
 
     if (currentBlock == 1 || currentBlock == 2) {
         printf("7. PK - block A, B\n");
-        printf("Description: nCE_EPROM_1, File in RPZU = 4, type of PLIS = 0, ¹ PLIS = 0\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 4, type of PLIS = 0, Number PLIS = 0\n");
 
         printf("8. LLIK - block A, B\n");
-        printf("Description: nCE_EPROM_1, File in RPZU = 5, type of PLIS = 0, ¹ PLIS = 1\n");
+        printf("Description: nCE_EPROM_1, File in RPZU = 5, type of PLIS = 0, Number PLIS = 1\n");
     }
 
     if (currentBlock == 1 || currentBlock == 2 || currentBlock == 3) {
         printf("9. Transit - block A, B, V \n");
-        printf("Description: nCE_EPROM_2, File in RPZU = 0, type of PLIS = 0, ¹ PLIS = 0\n");
+        printf("Description: nCE_EPROM_2, File in RPZU = 0, type of PLIS = 0, Number PLIS = 0\n");
 
         printf("10. Transit - block A, B, V\n");
-        printf("Description: nCE_EPROM_2, File in RPZU = 1, type of PLIS = 0, ¹ PLIS = 1\n");
+        printf("Description: nCE_EPROM_2, File in RPZU = 1, type of PLIS = 0, Number PLIS = 1\n");
 
         printf("11. KPA - block A, B, V\n");
-        printf("Description: nCE_EPROM_2, File in RPZU = 2, type of PLIS = 0, ¹ PLIS = 0\n");
+        printf("Description: nCE_EPROM_2, File in RPZU = 2, type of PLIS = 0, Number PLIS = 0\n");
 
         printf("12. KPA - block A, B, V\n");
-        printf("Description: nCE_EPROM_2, File in RPZU = 3, type of PLIS = 0, ¹ PLIS = 1\n");
+        printf("Description: nCE_EPROM_2, File in RPZU = 3, type of PLIS = 0, Number PLIS = 1\n");
     }
 
     if (currentBlock == 1 || currentBlock == 2) {
         printf("13. Interface - block A, B\n");
-        printf("Description: nCE_EPROM_2, File in RPZU = 4, type of PLIS = 1, ¹ PLIS = 2\n");
+        printf("Description: nCE_EPROM_2, File in RPZU = 4, type of PLIS = 1, Number PLIS = 2\n");
     }
 
     if (currentBlock == 3) {
         printf("14. Interface - block V\n");
-        printf("Description: nCE_EPROM_2, File in RPZU = 4, type of PLIS = 0, ¹ PLIS = 2\n");
+        printf("Description: nCE_EPROM_2, File in RPZU = 4, type of PLIS = 0, Number PLIS = 2\n");
     }
 
     scanf("%d", &command);

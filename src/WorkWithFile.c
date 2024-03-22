@@ -12,9 +12,9 @@
 
 FILE *file;
 
-char proshivkaPlis1[] =         "D:/Danya/Libary/C/935_1_2.rbf";
-char proshivkaPlis2[] =         "D:/Danya/Libary/C/935_2_2.rbf";
-char proshivkaPlisCyclone[] =   "D:/Danya/Libary/C/TEST_BA435_PSC.rbf";
+char proshivkaPlis1[] =         "D:/Danya/Libary/C/MM935_1_1_noise.rbf";
+char proshivkaPlis2[] =         "D:/Danya/Libary/C/MM935_2_1_noise.rbf";
+char proshivkaPlisCyclone[] =   "D:/Danya/Libary/C/BA435_WORK.rbf";
 char proshivkaPlis3[] =         "D:/Danya/Libary/C/TEST_REKURRENTA_5576.rbf";
 char proshivkaPlis4[] =         "D:/Danya/Libary/C/TEST_REKURRENTA_5576.rbf";
 
@@ -92,8 +92,8 @@ BOOL ReadFromFile()
             summaryFileRead += sizeRead;
             summaryFileReadInTotal += sizeRead;
 
-            printf("\nFile Size = %d, delitel = %d", GetFileSizeMy(), GetFileSizeMy() / 65535);
             printf("\nSumm of Transaction = %d, File Bytes Readed = %d", senderCounter+1, sizeRead);    // Кол-во посылок
+            printf("\nFile Size = %d, delitel = %d", GetFileSizeMy(), GetFileSizeMy() / 65535);
             printf("\nSumm File Bytes = %d Dec, = %X Hex", summaryFileReadInTotal, summaryFileReadInTotal);
             printf("\nFile Size Ostatok = %d Dec, = %X Hex", kolvoByte - summaryFileReadInTotal, kolvoByte - summaryFileReadInTotal);
             if (!TransmitPartOfProshivka(bufferRead, sizeRead/*sizeof(bufferRead)*/, answerMk))
@@ -122,8 +122,8 @@ BOOL ReadFromFile()
             summaryFileRead += sizeRead;
             summaryFileReadInTotal += sizeRead;
 
-            printf("\nFile Size = %d, delitel = %d", GetFileSizeMy(), GetFileSizeMy() / 65535);
             printf("\nSumm of Transaction = %d, File Bytes Readed = %d", senderCounter+1, sizeRead);    // Кол-во посылок
+            printf("\nFile Size = %d, delitel = %d", GetFileSizeMy(), GetFileSizeMy() / 65535);
             printf("\nSumm File Bytes = %d Dec, = %X Hex", summaryFileReadInTotal, summaryFileReadInTotal);
             printf("\nFile Size Ostatok = %d Dec, = %X Hex", kolvoByte - summaryFileReadInTotal, kolvoByte - summaryFileReadInTotal);
             if (!TransmitPartOfProshivka(bufferRead, sizeRead, answerMk))
@@ -155,9 +155,9 @@ BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *an
     for (i = 0; i < 4; i++)
         dataArray[arraySize + i] = crc32 >> (i*8);
 
-    for (i = 0; i < arraySize+4; i++)
+    /*for (i = 0; i < arraySize+4; i++)
         printf("[%3.d] = %2.x  ", i, dataArray[i]);
-    printf("\n");
+    printf("\n");*/
 
     Sleep(80);
 

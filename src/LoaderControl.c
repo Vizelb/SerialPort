@@ -51,7 +51,7 @@ void newMainFunc(void)
         }
         close_com_port();
     }
-    close_com_port();
+    //close_com_port();
     printf("END\n");
 }
 

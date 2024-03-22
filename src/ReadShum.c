@@ -10,7 +10,7 @@ extern const uint32_t crc32Table[256];
 
 void ReadShum()
 {
-    //int i, j;
+    int i, j;
     int counterPackage = 0;
     uint32_t dataWrote;
     uint32_t crcINT2 = 0xFFFFFFFF;
@@ -43,6 +43,42 @@ void ReadShum()
         counterPackage++;
         printf("\nTotal Bytes Receive = %d, = 0x%X ", counterPackage*SIZE_DATA_TO_PC, counterPackage*SIZE_DATA_TO_PC);
         printf(" - %d\n", dataWrote);
+
+        /*if (counterPackage == 81)
+        {
+            for (i = 0; i < 5; i++)
+            {
+                dataBuff[0] = 0x00;
+                dataWrote = fwrite(dataBuff, sizeof(uint8_t), SIZE_DATA_TO_PC, file);
+            }
+        }
+        if (counterPackage == 158)
+        {
+            for (i = 0; i < 5; i++)
+            {
+                dataBuff[0] = 0x00;
+                dataWrote = fwrite(dataBuff, sizeof(uint8_t), SIZE_DATA_TO_PC, file);
+            }
+        }
+        if (counterPackage == 222)
+        {
+            for (i = 0; i < 5; i++)
+            {
+                dataBuff[0] = 0x00;
+                dataWrote = fwrite(dataBuff, sizeof(uint8_t), SIZE_DATA_TO_PC, file);
+            }
+        }*/
+        /*if (counterPackage == 2000)
+        {
+            for (i = 0; i < 5; i++)
+            {
+                dataBuff[0] = 0x00;
+                dataWrote = fwrite(dataBuff, sizeof(uint8_t), SIZE_DATA_TO_PC, file);
+            }
+            fclose(file);
+            break;
+        }*/
+
 
         crcINT2 = (crcINT2 >> 8) ^ crc32Table[(crcINT2 ^ dataBuff[0]) & 0xFF];
         printf("crcINT2 = %8.X\n", crcINT2);
