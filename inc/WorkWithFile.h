@@ -9,12 +9,11 @@
 
 
 
-
 //  NewMain
-BOOL WorkWithFileDuPoUpdate();                  // протокол ДУ ПЛИС
+BOOL WorkWithFileDuPoUpdate(uint16_t dataSize);                  // протокол ДУ ПЛИС
 BOOL InitWorkWithFile(uint32_t currentPlis);    // ДК
 
-BOOL ReadFromFile();
+BOOL ReadFromFile(uint16_t dataSize);
 BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *answerMk);
 uint32_t GetFileSizeMy();
 

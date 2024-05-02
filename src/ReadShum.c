@@ -80,7 +80,7 @@ void ReadShum()
         }*/
 
 
-        crcINT2 = (crcINT2 >> 8) ^ crc32Table[(crcINT2 ^ dataBuff[0]) & 0xFF];
+        /*crcINT2 = (crcINT2 >> 8) ^ crc32Table[(crcINT2 ^ dataBuff[0]) & 0xFF];
         printf("crcINT2 = %8.X\n", crcINT2);
         if (counterPackage == 1250000)
         {
@@ -89,7 +89,7 @@ void ReadShum()
             counterPackage = 0;
             crcINT2 = 0xFFFFFFFF;
             break;
-        }
+        }*/
     }
 
     close_com_port();

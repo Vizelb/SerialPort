@@ -12,8 +12,8 @@
 
 FILE *file;
 
-char proshivkaPlis1[] =         "D:/Danya/Libary/C/MM935_1_1_noise.rbf";
-char proshivkaPlis2[] =         "D:/Danya/Libary/C/MM935_2_1_noise.rbf";
+char proshivkaPlis1[] =         "D:/Danya/Libary/C/MM935_1_2_PRD1.rbf";
+char proshivkaPlis2[] =         "D:/Danya/Libary/C/MM935_2_2_PRD1.rbf";
 char proshivkaPlisCyclone[] =   "D:/Danya/Libary/C/BA435_WORK.rbf";
 char proshivkaPlis3[] =         "D:/Danya/Libary/C/TEST_REKURRENTA_5576.rbf";
 char proshivkaPlis4[] =         "D:/Danya/Libary/C/TEST_REKURRENTA_5576.rbf";
@@ -38,7 +38,7 @@ BOOL InitWorkWithFile(uint32_t currentPlis)
     if (!OpenFileForPort(currentPlis))
         return FALSE;
     Sleep(1000);
-    if (!ReadFromFile())
+    if (!ReadFromFile(512))
         return FALSE;
     fclose(file);     // закрытие файла
     printf("\n\n\n\n END OF WORK WRITE/READ FILE");
@@ -47,12 +47,12 @@ BOOL InitWorkWithFile(uint32_t currentPlis)
 }
 
 
-BOOL WorkWithFileDuPoUpdate()
+BOOL WorkWithFileDuPoUpdate(uint16_t dataSize)
 {
     if (!OpenFilePLISDuPoUpdate())
         return FALSE;
     Sleep(1000);
-    if (!ReadFromFile())
+    if (!ReadFromFile(dataSize))
         return FALSE;
     fclose(file);     // закрытие файла
     printf("\n\n\n\n END OF WORK WRITE/READ FILE");
@@ -61,7 +61,7 @@ BOOL WorkWithFileDuPoUpdate()
 }
 
 // Ф-ция по чтению и отправки файла на com-port по 512 байт + 4 байта КС
-BOOL ReadFromFile()
+BOOL ReadFromFile(uint16_t dataSize)
 {
     int i, j;
     uint8_t stringSize;
@@ -88,7 +88,7 @@ BOOL ReadFromFile()
         while(summaryFileRead < 65536)
         {
             cheZaNumber = fseek(file, j*65536 + summaryFileRead, SEEK_SET);
-            sizeRead = fread(&bufferRead, sizeof(uint8_t), 512, file);
+            sizeRead = fread(&bufferRead, sizeof(uint8_t), dataSize, file);
             summaryFileRead += sizeRead;
             summaryFileReadInTotal += sizeRead;
 
@@ -100,7 +100,7 @@ BOOL ReadFromFile()
                 return FALSE;
             senderCounter++;
 
-            if(sizeRead < 512)
+            if(sizeRead < dataSize)
             {
                 printf("\n ERROR End of Reading");
                 return FALSE;
@@ -118,7 +118,7 @@ BOOL ReadFromFile()
         {
             cheZaNumber = fseek(file, j*65536 + summaryFileRead, SEEK_SET);
             printf("\n Number-shmumber = %d\n", cheZaNumber);
-            sizeRead = fread(&bufferRead, sizeof(uint8_t), 512, file);
+            sizeRead = fread(&bufferRead, sizeof(uint8_t), dataSize, file);
             summaryFileRead += sizeRead;
             summaryFileReadInTotal += sizeRead;
 
@@ -133,7 +133,7 @@ BOOL ReadFromFile()
             }
             senderCounter++;
 
-            if(sizeRead < 512)
+            if(sizeRead < dataSize)
             {
                 printf("\n End of Reading tyta chtoli?");
                 break;
@@ -155,9 +155,9 @@ BOOL TransmitPartOfProshivka(uint8_t *dataArray, uint16_t arraySize, uint8_t *an
     for (i = 0; i < 4; i++)
         dataArray[arraySize + i] = crc32 >> (i*8);
 
-    /*for (i = 0; i < arraySize+4; i++)
+    for (i = 0; i < arraySize+4; i++)
         printf("[%3.d] = %2.x  ", i, dataArray[i]);
-    printf("\n");*/
+    printf("\n");
 
     Sleep(80);
 
@@ -214,9 +214,9 @@ BOOL OpenFilePLISDuPoUpdate()
             if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 1 && commandDu.command.bytes.four_byte.bits.NumPLIS == 1)
                 file = fopen(proshivkaPlis2, "rb");
             if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 2 && commandDu.command.bytes.four_byte.bits.NumPLIS == 0)
-                file = fopen(proshivkaPlis1, "rb");
+                file = fopen(proshivkaPlis3, "rb");
             if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 3 && commandDu.command.bytes.four_byte.bits.NumPLIS == 1)
-                file = fopen(proshivkaPlis2, "rb");
+                file = fopen(proshivkaPlis4, "rb");
         }
         if (commandDu.command.bytes.second_byte.bits.AMP == 1 || commandDu.command.bytes.second_byte.bits.AMP == 2) // Interface Block-A/B
         {
@@ -227,11 +227,11 @@ BOOL OpenFilePLISDuPoUpdate()
         }
         if (commandDu.command.bytes.second_byte.bits.AMP == 3)      // Interface Block-V
         {
-            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU != 4)
-                return FALSE;
+            /*if (commandDu.command.bytes.four_byte.bits.NumFileRPZU != 4)
+                return FALSE;*/
             if (commandDu.command.bytes.four_byte.bits.TypePLIS != 0)
                 return FALSE;
-            if (commandDu.command.bytes.four_byte.bits.NumPLIS == 2)
+            if (commandDu.command.bytes.four_byte.bits.NumFileRPZU == 4 && commandDu.command.bytes.four_byte.bits.NumPLIS == 2)
                 file = fopen(proshivkaPlis3, "rb");
         }
     }

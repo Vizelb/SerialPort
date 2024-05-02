@@ -99,13 +99,16 @@ typedef struct AnswerFromMk
 #define K_KVIT                              ((uint8_t) 0x91)
 #define K_R_D                               ((uint8_t) 0x9F)
 
-#define SIZE_PLIS_RUSSIAN           ((uint32_t) 0x12F57)
-#define SIZE_PLIS_CYCLONE           ((uint32_t) 0x59D8B)
+#define SIZE_PLIS_RUSSIAN                   ((uint32_t) 0x12F57)
+#define SIZE_PLIS_CYCLONE                   ((uint32_t) 0x59D8B)
+
+#define INFO_FILE_SIZE_512                  ((uint16_t) 512)
+#define INFO_FILE_SIZE_128                  ((uint16_t) 128)
 
 //  main
 void newMainFunc(void);
 BOOL OperatingModeController(int consoleCommand);
-BOOL LoadByDuPoPlisFirmware();
+BOOL LoadByDuPoPlisFirmware(uint32_t COM_PORT, uint32_t PORT_SPEED, uint16_t dataSize);
 BOOL TxRx_DataControl(uint8_t *command, uint32_t commandSize, int time_out);
 BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint8_t codeCommand);
 

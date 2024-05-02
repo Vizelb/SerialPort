@@ -60,18 +60,20 @@ BOOL OperatingModeController(int consoleCommand)
     printf("Start Work\n");
 
     if (consoleCommand == 1 || consoleCommand == 2)
-        return LoadByDuPoPlisFirmware();
+        return LoadByDuPoPlisFirmware(COM_PORT_4, CBR_115200, INFO_FILE_SIZE_512);
     if (consoleCommand == 3)
         return LoadInDkPlisFirmware();
+    if (consoleCommand == 4)
+        return LoadByDuPoPlisFirmware(COM_PORT_9, CBR_115200, INFO_FILE_SIZE_128);
 }
 
 // Загрузка ПО ПЛИС по протоколу ДУ
-BOOL LoadByDuPoPlisFirmware()
+BOOL LoadByDuPoPlisFirmware(uint32_t COM_PORT, uint32_t PORT_SPEED, uint16_t dataSize)
 {
     int i;
     uint8_t command[14];
 
-    if (!SetSettingsComPort(COM_PORT_4, CBR_115200))
+    if (!SetSettingsComPort(COM_PORT, PORT_SPEED))
             return FALSE;
 
     FormCommandLoadDuPoPlis(command);
@@ -79,7 +81,7 @@ BOOL LoadByDuPoPlisFirmware()
     if (!TxRx_DataControl(command, 14, READ_TIME_COMMAND))
         return FALSE;
 
-    if (!WorkWithFileDuPoUpdate())
+    if (!WorkWithFileDuPoUpdate(dataSize))
         return FALSE;
 
     return TRUE;
