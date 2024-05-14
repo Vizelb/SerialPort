@@ -11,6 +11,7 @@
 
 //  NewMain
 BOOL WorkWithFileDuPoUpdate(uint16_t dataSize);                  // протокол ДУ ПЛИС
+BOOL WorkWithFileDuPoUpdate_ChooseFile(uint16_t dataSize);
 BOOL InitWorkWithFile(uint32_t currentPlis);    // ДК
 
 BOOL ReadFromFile(uint16_t dataSize);

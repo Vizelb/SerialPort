@@ -44,7 +44,9 @@ int DuConsoleCommand(void)
     printf("2 - Commands to download driver for PLIS throw MM871 in MM935/BA435/MM937\n");
     printf("3 - update Dk (D6) driver\n");
     printf("4 - Commands to download driver for PLIS in MM935/BA435/MM937\n");
-    printf("9 - End of Work\n");
+    printf("\n5 - Choose file from console.\nCommands to download driver for PLIS throw MM871 in MM935/BA435/MM937\n");
+    printf("6 - Choose file from console.\nCommands to download driver for PLIS in MM935/BA435/MM937\n");
+    printf("\n9 - End of Work\n");
     scanf("%d", &command);
     printf("Command - %X\n", command);
 
@@ -55,6 +57,11 @@ int DuConsoleCommand(void)
     if (command == 3)
         commandPlis = ConsoleCommandDkDriverUpdate();
     if (command == 4)
+        CommandPoPlisDuProtocol();
+
+    if (command == 5)
+        CommandPoPlisDuProtocol();
+    if (command == 6)
         CommandPoPlisDuProtocol();
 
     return command;

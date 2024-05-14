@@ -109,6 +109,7 @@ typedef struct AnswerFromMk
 void newMainFunc(void);
 BOOL OperatingModeController(int consoleCommand);
 BOOL LoadByDuPoPlisFirmware(uint32_t COM_PORT, uint32_t PORT_SPEED, uint16_t dataSize);
+BOOL LoadByDuPoPlisFirmware_ChooseFile(uint32_t COM_PORT, uint32_t PORT_SPEED, uint16_t dataSize);
 BOOL TxRx_DataControl(uint8_t *command, uint32_t commandSize, int time_out);
 BOOL CheckAnswerCommand(uint8_t *commandAnswer, uint8_t codeCommand);
 

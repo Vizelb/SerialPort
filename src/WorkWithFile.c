@@ -1,6 +1,7 @@
 #include "../inc/WorkWithFile.h"
 #include "../inc/PortMenu.h"
 #include "../inc/LoaderControl.h"
+#include "../inc/CreateFile.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,6 +51,19 @@ BOOL InitWorkWithFile(uint32_t currentPlis)
 BOOL WorkWithFileDuPoUpdate(uint16_t dataSize)
 {
     if (!OpenFilePLISDuPoUpdate())
+        return FALSE;
+    Sleep(1000);
+    if (!ReadFromFile(dataSize))
+        return FALSE;
+    fclose(file);     // закрытие файла
+    printf("\n\n\n\n END OF WORK WRITE/READ FILE");
+    return TRUE;
+
+}
+
+BOOL WorkWithFileDuPoUpdate_ChooseFile(uint16_t dataSize)
+{
+    if (!InitCreateFile())
         return FALSE;
     Sleep(1000);
     if (!ReadFromFile(dataSize))

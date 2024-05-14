@@ -65,6 +65,12 @@ BOOL OperatingModeController(int consoleCommand)
         return LoadInDkPlisFirmware();
     if (consoleCommand == 4)
         return LoadByDuPoPlisFirmware(COM_PORT_9, CBR_115200, INFO_FILE_SIZE_128);
+
+    // Для выбора файла прошивки через консоль
+    if (consoleCommand == 5)
+        return LoadByDuPoPlisFirmware_ChooseFile(COM_PORT_4, CBR_115200, INFO_FILE_SIZE_512);
+    if (consoleCommand == 6)
+        return LoadByDuPoPlisFirmware_ChooseFile(COM_PORT_9, CBR_115200, INFO_FILE_SIZE_128);
 }
 
 // Загрузка ПО ПЛИС по протоколу ДУ
@@ -87,6 +93,25 @@ BOOL LoadByDuPoPlisFirmware(uint32_t COM_PORT, uint32_t PORT_SPEED, uint16_t dat
     return TRUE;
 }
 
+// Загрузка ПО ПЛИС по протоколу ДУ
+BOOL LoadByDuPoPlisFirmware_ChooseFile(uint32_t COM_PORT, uint32_t PORT_SPEED, uint16_t dataSize)
+{
+    int i;
+    uint8_t command[14];
+
+    if (!SetSettingsComPort(COM_PORT, PORT_SPEED))
+            return FALSE;
+
+    FormCommandLoadDuPoPlis(command);
+
+    if (!TxRx_DataControl(command, 14, READ_TIME_COMMAND))
+        return FALSE;
+
+    if (!WorkWithFileDuPoUpdate_ChooseFile(dataSize))
+        return FALSE;
+
+    return TRUE;
+}
 
 
 
