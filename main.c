@@ -15,6 +15,7 @@ int main()
     //mainBootloader();
     //ReadShum();   // Func for read buff for check BA285
     newMainFunc();    // MAIN NEW WORK FUNCTION v2.0
+    //InitCreateFile();
 
 
 
