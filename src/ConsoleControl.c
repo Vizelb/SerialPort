@@ -46,6 +46,7 @@ int DuConsoleCommand(void)
     printf("4 - Commands to download driver for PLIS in MM935/BA435/MM937\n");
     printf("\n5 - Choose file from console.\nCommands to download driver for PLIS throw MM871 in MM935/BA435/MM937\n");
     printf("6 - Choose file from console.\nCommands to download driver for PLIS in MM935/BA435/MM937\n");
+    printf("7 - Create own commands & Choose file from console.\nCommands to download driver for PLIS in MM935/BA435/MM937\n");
     printf("\n9 - End of Work\n");
     scanf("%d", &command);
     printf("Command - %X\n", command);
@@ -63,6 +64,8 @@ int DuConsoleCommand(void)
         CommandPoPlisDuProtocol();
     if (command == 6)
         CommandPoPlisDuProtocol();
+    if (command == 7)
+        FormCommandPoPlisDuUpdate_advancedMode();
 
     return command;
 }
@@ -110,6 +113,32 @@ void FormCommandPoPlisDuUpdate()
     rpzuFileNumber = rpzuFileNumberTemp;
     printf("Command rpzuFileNumber - %X\n", rpzuFileNumber);*/
 }
+
+void FormCommandPoPlisDuUpdate_advancedMode()
+{
+    int command = 0;
+
+    printf("\nInput currentBlock\n    1 - Block A;\n    2 - Block B;\n    3 - Block V;\n");
+    scanf("%d", &currentBlock);
+    printf("currentBlock - %X\n", currentBlock);
+
+    printf("\nInput rpzuNumber:\n    1 - nCE_EPROM_1\n    2 - nCE_EPROM_2\n");
+    scanf("%d", &rpzuNumber);
+    printf("Command rpzuNumber - %X\n\n", rpzuNumber);
+
+    printf("\nInput plisType:\n    1 - 5576XC11\n    2 - CYCLONE4E\n");
+    scanf("%d", &plisType);
+    printf("Command plisType - %X \n", plisType);
+
+    printf("\nInput rpzuFileNumber - X:\n    1, 2, 3, 4, 5, 6, ... , 23, 24, 25, 26.\n");
+    scanf("%d", &rpzuFileNumber);
+    printf("Command rpzuFileNumber - %X \n", rpzuFileNumber);
+
+    plisNum = 1;
+
+    printf("Description Result: currentBlock = %d, nCE_EPROM_%d, File in RPZU = %d, type of PLIS = %d, ¹ PLIS = %d\n", currentBlock, rpzuNumber, rpzuFileNumber-1, plisType-1, plisNum-1);
+}
+
 
 void CommandPoPlisDuProtocol()
 {

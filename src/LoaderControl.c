@@ -69,8 +69,9 @@ BOOL OperatingModeController(int consoleCommand)
     // Для выбора файла прошивки через консоль
     if (consoleCommand == 5)
         return LoadByDuPoPlisFirmware_ChooseFile(COM_PORT_4, CBR_115200, INFO_FILE_SIZE_512);
-    if (consoleCommand == 6)
+    if (consoleCommand == 6 || consoleCommand == 7)
         return LoadByDuPoPlisFirmware_ChooseFile(COM_PORT_9, CBR_115200, INFO_FILE_SIZE_128);
+
 }
 
 // Загрузка ПО ПЛИС по протоколу ДУ
